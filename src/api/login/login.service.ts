@@ -1,13 +1,11 @@
+/* eslint-disable prettier/prettier */
 import { ResponseSuccess } from '@/types';
 import { MESS_CODE, PASSWORD_REGEX, t } from '@/utils';
 import { AuthService } from '@auth/auth.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Role } from '@prisma/client';
-// import { , Status } from '@prisma/client';
 import { BcryptService, PrismaService } from '@services';
-import * as moment from 'moment';
-import * as randomize from 'randomatic';
-import { ForgotPasswordDto, LoginUserDto, ResetPasswordDto,RegisterDoctorDto, RegisterPatientDto } from './dto';
+import { LoginUserDto, RegisterDoctorDto, RegisterPatientDto } from './dto';
 @Injectable()
 export class LoginUserService {
   constructor(
@@ -19,7 +17,7 @@ export class LoginUserService {
   async refresh(user: any, token: string) {
     try {
       const data = await this.authService.refresh(user, token);
-      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {  });
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       throw new BadRequestException(err.message);
     }
@@ -35,13 +33,22 @@ export class LoginUserService {
           // status: Status.ACTIVE,
         },
       });
-      if (!phoneExist) throw new BadRequestException(t(MESS_CODE['USERNAME_OR_PASSWORD_INCORRECT'], ));
+      if (!phoneExist)
+        throw new BadRequestException(
+          t(MESS_CODE['PHONE_OR_PASSWORD_INCORRECT']),
+        );
 
-      const isPasswordMatch = await this.bcryptService.compare(dto.password, phoneExist.password);
-      if (!isPasswordMatch) throw new BadRequestException(t(MESS_CODE['USERNAME_OR_PASSWORD_INCORRECT'], ));
+      const isPasswordMatch = await this.bcryptService.compare(
+        dto.password,
+        phoneExist.password,
+      );
+      if (!isPasswordMatch)
+        throw new BadRequestException(
+          t(MESS_CODE['PHONE_OR_PASSWORD_INCORRECT']),
+        );
 
       const data = await this.authService.login(phoneExist);
-      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {  });
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       throw new BadRequestException(err.message);
     }
@@ -50,7 +57,7 @@ export class LoginUserService {
   async logout(user: any) {
     try {
       const data = await this.authService.logout(user);
-      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {  });
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       throw new BadRequestException(err.message);
     }
@@ -58,7 +65,6 @@ export class LoginUserService {
 
   async registerDoctor(dto: RegisterDoctorDto) {
     try {
-
       // Generate password
       // const randomPassword = randomize('Aa0', 8);
       const hash = await this.bcryptService.hash(dto.password);
@@ -71,7 +77,7 @@ export class LoginUserService {
           isDeleted: false,
         },
       });
-      if (userExist) throw new BadRequestException(t(MESS_CODE['PHONE_EXIST'], ));
+      if (userExist) throw new BadRequestException(t(MESS_CODE['PHONE_EXIST']));
 
       // Check for user phone exists
       const userEmailExist = await this.prismaService.doctor.findFirst({
@@ -80,13 +86,15 @@ export class LoginUserService {
           isDeleted: false,
         },
       });
-      if (userEmailExist) throw new BadRequestException(t(MESS_CODE['PHONE_EXIST'], ));
+      if (userEmailExist)
+        throw new BadRequestException(t(MESS_CODE['EMAIL_EXIST']));
 
-    
+      if (dto?.password.length < 6) {
+        throw new BadRequestException(t(MESS_CODE['PASSWORD_INVALID']));
+      }
 
       const data = await this.prismaService.$transaction(async (prisma) => {
         // Check for role exists
-        
 
         // Create user
         const user = await prisma.user.create({
@@ -97,7 +105,7 @@ export class LoginUserService {
           },
         });
 
-        delete dto.phone
+        delete dto.phone;
 
         const doctor = await prisma.doctor.create({
           data: {
@@ -111,14 +119,14 @@ export class LoginUserService {
             id: user.id,
           },
           data: {
-            memberId: doctor.id
-          }
-        })
+            memberId: doctor.id,
+          },
+        });
 
         return doctor;
       });
       const { ...result } = data;
-      return ResponseSuccess(result, MESS_CODE['SUCCESS'], {  });
+      return ResponseSuccess(result, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       console.log(err.message);
       throw new BadRequestException(err.message);
@@ -127,7 +135,6 @@ export class LoginUserService {
 
   async registerPatient(dto: RegisterPatientDto) {
     try {
-
       // Generate password
       // const randomPassword = randomize('Aa0', 8);
       const hash = await this.bcryptService.hash(dto.password);
@@ -140,13 +147,14 @@ export class LoginUserService {
           isDeleted: false,
         },
       });
-      if (userExist) throw new BadRequestException(t(MESS_CODE['PHONE_EXIST'], ));
+      if (userExist) throw new BadRequestException(t(MESS_CODE['PHONE_EXIST']));
 
-
+      if (dto?.password.length < 6) {
+        throw new BadRequestException(t(MESS_CODE['PASSWORD_INVALID']));
+      }
 
       const data = await this.prismaService.$transaction(async (prisma) => {
         // Check for role exists
-        
 
         // Create user
         const user = await prisma.user.create({
@@ -157,7 +165,7 @@ export class LoginUserService {
           },
         });
 
-        delete dto.phone
+        delete dto.phone;
 
         const patient = await prisma.patient.create({
           data: {
@@ -177,14 +185,14 @@ export class LoginUserService {
             id: user.id,
           },
           data: {
-            memberId: patient.id
-          }
-        })
+            memberId: patient.id,
+          },
+        });
 
         return patient;
       });
       const { ...result } = data;
-      return ResponseSuccess(result, MESS_CODE['SUCCESS'], {  });
+      return ResponseSuccess(result, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       throw new BadRequestException(err.message);
     }

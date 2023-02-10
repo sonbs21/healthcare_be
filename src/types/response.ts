@@ -1,10 +1,16 @@
+/* eslint-disable prettier/prettier */
 import { t } from '@/utils/message';
 import { Pagination } from './pagination';
 
 export const ResponseSuccess = (
   data: any,
   code: string,
-  options: { statusCode?: number; pagination?: Pagination; total?: number; other?: any } = {},
+  options: {
+    statusCode?: number;
+    pagination?: Pagination;
+    total?: number;
+    other?: any;
+  } = {},
 ) => {
   const { statusCode, pagination = {}, total = 0, other } = options;
   let paginate = undefined;
@@ -33,7 +39,10 @@ export const convertPagination = (pagination: Pagination, total: number) => {
     delete pagination.skip;
     delete pagination.take;
     const totalPage = total / pagination.pageSize;
-    const lastPage = Math.floor(totalPage) < totalPage ? Math.floor(totalPage) + 1 : Math.floor(totalPage);
+    const lastPage =
+      Math.floor(totalPage) < totalPage
+        ? Math.floor(totalPage) + 1
+        : Math.floor(totalPage);
     if (pagination)
       paginate = {
         ...pagination,

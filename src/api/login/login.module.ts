@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { LoginUserController } from '@api/login/login.controller';
 import { LoginUserService } from '@api/login/login.service';
 import { Module } from '@nestjs/common';

@@ -4,26 +4,26 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
 import { cleanup, convertFilterStringToArray, MESS_CODE, t } from '@utils';
-import { CreateBmiDto, FilterBmiDto, UpdateBmiDto } from './dto';
+import { CreateBloodPressureDto, FilterBloodPressureDto, UpdateBloodPressureDto } from './dto';
 
 @Injectable()
-export class BmiService {
+export class BloodPressureService {
   constructor(private prismaService: PrismaService) {}
 
-  async checkBmiExist(id) {
-    const bmi = await this.prismaService.bmi.findFirst({
+  async checkBloodPressureExist(id) {
+    const bloodPressure = await this.prismaService.bloodPressure.findFirst({
       where: {
         id: id,
         isDeleted: false,
       },
     });
-    return bmi;
+    return bloodPressure;
   }
 
-  async findAll(dto: FilterBmiDto, pagination: Pagination) {
+  async findAll(dto: FilterBloodPressureDto, pagination: Pagination) {
     try {
       const { skip, take } = pagination;
-      let where: Prisma.BmiWhereInput = {
+      let where: Prisma.BloodPressureWhereInput = {
         isDeleted: false,
       };
 
@@ -74,11 +74,11 @@ export class BmiService {
 
   async findOne(id: string) {
     try {
-      const exist = await this.checkBmiExist({ id });
+      const exist = await this.checkBloodPressureExist({ id });
       if (!exist)
-        throw new BadRequestException(t(MESS_CODE['BMI_NOT_FOUND'], {}));
+        throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
 
-      const data = await this.prismaService.bmi.findFirst({
+      const data = await this.prismaService.bloodPressure.findFirst({
         where: {
           id,
           isDeleted: false,
@@ -90,20 +90,20 @@ export class BmiService {
     }
   }
 
-  async create(memberId: string, dto: CreateBmiDto) {
+  async create(memberId: string, dto: CreateBloodPressureDto) {
     try {
-      const { height, weight, healthRecordId } = dto;
-      if (Number(height) < 0) {
+      const { systolic, diastolic, healthRecordId } = dto;
+      if (Number(systolic) < 0) {
         throw new BadRequestException(t(MESS_CODE['INVALID_HEIGHT']));
       }
-      if (Number(weight) < 0) {
-        throw new BadRequestException(t(MESS_CODE['INVALID_WEIGHT']));
+      if (Number(diastolic) < 0) {
+        throw new BadRequestException(t(MESS_CODE['INVALID_HEIGHT']));
       }
 
-      const data = await this.prismaService.bmi.create({
+      const data = await this.prismaService.bloodPressure.create({
         data: {
-          weight,
-          height,
+          systolic,
+          diastolic,
           healthRecordId,
           createdBy: memberId,
         },
@@ -112,25 +112,25 @@ export class BmiService {
     } catch (error) {}
   }
 
-  async update(memberId: string, id: string, dto: UpdateBmiDto) {
+  async update(memberId: string, id: string, dto: UpdateBloodPressureDto) {
     try {
-      const { height, weight } = dto;
-      const exist = await this.checkBmiExist({ id });
+      const { systolic, diastolic } = dto;
+      const exist = await this.checkBloodPressureExist({ id });
       if (!exist)
-        throw new BadRequestException(t(MESS_CODE['BMI_NOT_FOUND'], {}));
+        throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
 
-      if (Number(height) < 0) {
-        throw new BadRequestException(t(MESS_CODE['INVALID_HEIGHT']));
+      if (Number(systolic) < 0) {
+        throw new BadRequestException(t(MESS_CODE['INVALID_SYSTOLIC']));
       }
-      if (Number(weight) < 0) {
-        throw new BadRequestException(t(MESS_CODE['INVALID_WEIGHT']));
+      if (Number(diastolic) < 0) {
+        throw new BadRequestException(t(MESS_CODE['INVALID_DIASTOLIC']));
       }
 
-      const data = await this.prismaService.bmi.update({
+      const data = await this.prismaService.bloodPressure.update({
         where: { id },
         data: {
-          weight,
-          height,
+          systolic,
+          diastolic,
           updatedBy: memberId,
         },
       });
@@ -141,10 +141,10 @@ export class BmiService {
 
   async delete(memberId: string, id: string) {
     try {
-      const exist = await this.checkBmiExist({ id });
+      const exist = await this.checkBloodPressureExist({ id });
       if (!exist)
-        throw new BadRequestException(t(MESS_CODE['BMI_NOT_FOUND'], {}));
-      const data = await this.prismaService.bmi.update({
+        throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
+      const data = await this.prismaService.bloodPressure.update({
         where: { id },
         data: {
           isDeleted: true,

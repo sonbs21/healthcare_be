@@ -1,12 +1,11 @@
-import {  MESS_CODE} from '@/utils';
+/* eslint-disable prettier/prettier */
+import { MESS_CODE } from '@/utils';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { BcryptService, PrismaService } from '@services';
 import { ResponseSuccess } from '../../types/response';
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly prismaService: PrismaService,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async checkUserExist(id: string) {
     return await this.prismaService.user.findFirst({
@@ -34,19 +33,18 @@ export class UsersService {
           isDeleted: false,
         },
         select: {
-          id:true,
+          id: true,
           phone: true,
-          memberId:true,
-          doctor:true,
-          patient:true,
+          memberId: true,
+          doctor: true,
+          patient: true,
         },
       });
-      return ResponseSuccess(data, MESS_CODE['SUCCESS'], { });
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       throw new BadRequestException(err.message);
     }
   }
-
 
   // async createUser(userId: string, dto: CreateUsersDto) {
   //   try {

@@ -2,7 +2,12 @@
 import { ResponseSuccess } from '@/types';
 import { convertFilterStringToArray, MESS_CODE, t } from '@/utils';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma, Status, TypeConversation } from '@prisma/client';
+import {
+  Prisma,
+  Status,
+  TypeConversation,
+  TypeNotification,
+} from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination } from '@types';
 import { cleanup } from '@utils';
@@ -79,7 +84,7 @@ export class PatientService {
         where: { id },
       });
       if (!exist)
-        throw new BadRequestException(t(MESS_CODE['PRODUCT_NOT_FOUND']));
+        throw new BadRequestException(t(MESS_CODE['PATIENT_NOT_FOUND']));
 
       const data = await this.prismaService.patient.findFirst({
         where: { id },
@@ -97,7 +102,7 @@ export class PatientService {
         where: { id },
       });
       if (!exist)
-        throw new BadRequestException(t(MESS_CODE['PRODUCT_NOT_FOUND']));
+        throw new BadRequestException(t(MESS_CODE['PATIENT_NOT_FOUND']));
 
       const data = await this.prismaService.patient.update({
         where: { id },
@@ -120,19 +125,24 @@ export class PatientService {
         where: { id: dto.doctorId },
       });
       if (!exist)
-        throw new BadRequestException(t(MESS_CODE['PRODUCT_NOT_FOUND']));
+        throw new BadRequestException(t(MESS_CODE['DOCTOR_NOT_FOUND']));
 
       const data = await this.prismaService.$transaction(async (prisma) => {
-        prisma.patient.update({
+        await prisma.patient.update({
           where: { id: memberId },
           data: {
             doctorId: dto.doctorId,
           },
         });
 
+        const patient = await prisma.patient.findFirst({
+          where: { id: memberId },
+          select: patientSelect,
+        });
+
         const arr = [memberId, dto.doctorId];
 
-        prisma.conversation.create({
+        await prisma.conversation.create({
           data: {
             avatar: null,
             typeConversation: TypeConversation.SINGLE,
@@ -142,10 +152,20 @@ export class PatientService {
           },
         });
 
-        prisma.healthRecord.create({
+        await prisma.healthRecord.create({
           data: {
             patientId: memberId,
             status: Status.SAFE,
+          },
+        });
+
+        await prisma.notification.create({
+          data: {
+            title: 'Chăm sóc bệnh nhân',
+            content: `Bệnh nhân ${patient.fullName} đã được phân công cho bạn`,
+            typeNotification: TypeNotification.SYSTEM,
+            isRead: false,
+            userId: dto.doctorId,
           },
         });
 

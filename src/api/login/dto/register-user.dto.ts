@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Gender } from '@enums';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
@@ -48,7 +49,7 @@ export class RegisterDoctorDto {
   @ApiProperty({ example: Gender.MALE })
   gender: Gender;
 
-   @IsString()
+  @IsString()
   @IsNotEmpty()
   @ApiProperty({ example: '' })
   address: string;
@@ -86,7 +87,6 @@ export class RegisterPatientDto {
   @ApiProperty({ example: '123123' })
   password: string;
 
-
   @IsString()
   @Transform(({ obj, key }) => obj[key]?.trim())
   @IsNotEmpty()
@@ -104,9 +104,28 @@ export class RegisterPatientDto {
   @ApiProperty({ example: Gender.MALE })
   gender: Gender;
 
-   @IsString()
+  @IsString()
   @IsNotEmpty()
   @ApiProperty({ example: '' })
   address: string;
 
- }
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ example: '' })
+  insuranceNumber: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ example: '' })
+  job: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ example: '' })
+  state: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ example: '' })
+  medicalHistory: string;
+}

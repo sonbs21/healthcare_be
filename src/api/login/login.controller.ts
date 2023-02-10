@@ -1,9 +1,26 @@
+/* eslint-disable prettier/prettier */
 import { LoginUserService } from '@api/login/login.service';
 import { JwtAuthGuard, JwtRefreshAuthGuard } from '@auth/guards';
 import { CurrentUser } from '@decorators';
-import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
-import { ForgotPasswordDto, LoginUserDto, RegisterDoctorDto, RegisterPatientDto, ResetPasswordDto } from './dto';
+import {
+  ForgotPasswordDto,
+  LoginUserDto,
+  RegisterDoctorDto,
+  RegisterPatientDto,
+  ResetPasswordDto,
+} from './dto';
 
 @Controller('v1/auth')
 @ApiTags('Login User')

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { INestApplication, Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
@@ -8,7 +9,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   // private readonly logger = new Logger(this.constructor.name);
   constructor(configService: ConfigService) {
     super({
-      log: configService.get('LOG_SQL') ? ['query', 'info', 'warn', 'error'] : [],
+      log: configService.get('LOG_SQL')
+        ? ['query', 'info', 'warn', 'error']
+        : [],
     });
   }
 

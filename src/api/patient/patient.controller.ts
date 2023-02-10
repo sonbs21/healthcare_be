@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { JwtAuthGuard } from '@auth/guards';
 import { CurrentUser, Paginate } from '@decorators';
 import {
@@ -26,8 +27,8 @@ export class PatientController {
 
   @Get('patients')
   @HttpCode(HttpStatus.OK)
-  findAll( @Query() dto: FilterPatientsDto, @Paginate() pagination: Pagination) {
-    return this.patientService.findAll( dto, pagination);
+  findAll(@Query() dto: FilterPatientsDto, @Paginate() pagination: Pagination) {
+    return this.patientService.findAll(dto, pagination);
   }
 
   @Get('patient/:id')
@@ -36,23 +37,21 @@ export class PatientController {
     return this.patientService.findOne(id);
   }
 
-
   @Patch('patient/:id')
   @HttpCode(HttpStatus.OK)
-  update( @Param('id') id: string, @Body() dto: UpdatePatientDto) {
+  update(@Param('id') id: string, @Body() dto: UpdatePatientDto) {
     return this.patientService.update(id, dto);
   }
 
   @Put('patient/select/:id')
   @HttpCode(HttpStatus.OK)
-  selectDoctor( @Param('id') id: string, @Body() dto: SelectDoctorDto) {
+  selectDoctor(@Param('id') id: string, @Body() dto: SelectDoctorDto) {
     return this.patientService.selectDoctor(id, dto);
   }
 
   @Put('patient/revoke/:id')
   @HttpCode(HttpStatus.OK)
-  revokeDoctor( @Param('id') id: string) {
+  revokeDoctor(@Param('id') id: string) {
     return this.patientService.revokeDoctor(id);
   }
-
 }

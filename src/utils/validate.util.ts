@@ -1,6 +1,5 @@
-import {
-  Gender,
-} from '@prisma/client';
+/* eslint-disable prettier/prettier */
+import { Gender } from '@prisma/client';
 import * as moment from 'moment';
 import { t } from './message';
 
@@ -13,8 +12,6 @@ export const validateGender = (value: string) => {
       break;
     case t(Gender.MALE):
       tmp = Gender.MALE;
-      break;
-    
       break;
     default:
       break;

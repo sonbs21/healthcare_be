@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Gender } from '@prisma/client';
 import { t } from '@utils';
 export { Gender } from '@prisma/client';

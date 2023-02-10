@@ -79,7 +79,7 @@ export class DoctorService {
         where: { id },
       });
       if (!exist)
-        throw new BadRequestException(t(MESS_CODE['PRODUCT_NOT_FOUND']));
+        throw new BadRequestException(t(MESS_CODE['DOCTOR_NOT_FOUND']));
 
       const data = await this.prismaService.doctor.findFirst({
         where: { id },
@@ -97,7 +97,7 @@ export class DoctorService {
         where: { id },
       });
       if (!exist)
-        throw new BadRequestException(t(MESS_CODE['PRODUCT_NOT_FOUND']));
+        throw new BadRequestException(t(MESS_CODE['DOCTOR_NOT_FOUND']));
 
       const data = await this.prismaService.doctor.update({
         where: { id },

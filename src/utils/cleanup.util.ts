@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /** Process a deep search to remove all **null** or **undefined** field
  * @param data Object to cleanup
  * @param options More configs to control the return value
@@ -8,13 +9,20 @@ export function cleanup<T>(data: T, options?: { returnEmpty?: boolean }): T;
  * @param data Object to cleanup
  * @param options More configs to control the return value
  */
-export function cleanup<T>(data: Array<T>, options?: { returnEmpty?: boolean }): Array<T>;
+export function cleanup<T>(
+  data: Array<T>,
+  options?: { returnEmpty?: boolean },
+): Array<T>;
 
 export function cleanup<T>(data: T, options?: { returnEmpty?: boolean }) {
   let entries: unknown[];
 
   if (Array.isArray(data)) {
-    entries = data.filter((v) => v != null).map((v) => (v === Object(v) || Array.isArray(v) ? cleanup(v, options) : v));
+    entries = data
+      .filter((v) => v != null)
+      .map((v) =>
+        v === Object(v) || Array.isArray(v) ? cleanup(v, options) : v,
+      );
 
     if (options?.returnEmpty) {
       return entries as T[];
@@ -26,7 +34,10 @@ export function cleanup<T>(data: T, options?: { returnEmpty?: boolean }) {
   } else {
     entries = Object.entries(data)
       .filter((v) => v != null)
-      .map(([k, v]) => [k, v === Object(v) || Array.isArray(v) ? cleanup(v, options) : v]);
+      .map(([k, v]) => [
+        k,
+        v === Object(v) || Array.isArray(v) ? cleanup(v, options) : v,
+      ]);
 
     if (options?.returnEmpty) {
       return Object.fromEntries(entries as any[]) as T;

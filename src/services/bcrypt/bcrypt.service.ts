@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -14,13 +15,19 @@ export class BcryptService {
   }
 
   async hash(data: string | Buffer) {
-    const preHash = createHash('SHA256').update(data).update(this.salt).digest();
+    const preHash = createHash('SHA256')
+      .update(data)
+      .update(this.salt)
+      .digest();
     const hash = await bcrypt.hash(preHash, this.rounds);
     return hash;
   }
 
   async compare(data: string | Buffer, encrypted: string) {
-    const preHash = createHash('SHA256').update(data).update(this.salt).digest();
+    const preHash = createHash('SHA256')
+      .update(data)
+      .update(this.salt)
+      .digest();
     const result = await bcrypt.compare(preHash, encrypted);
     return result;
   }

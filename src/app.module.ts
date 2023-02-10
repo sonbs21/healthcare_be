@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { ApiModule } from '@api/api.module';
 import { AuthModule } from '@auth/auth.module';
 import { Logger, Module } from '@nestjs/common';

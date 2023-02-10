@@ -1,10 +1,8 @@
-
+/* eslint-disable prettier/prettier */
 import * as moment from 'moment';
 import { ForbiddenException } from '@nestjs/common';
 import * as https from 'https';
 import * as fs from 'fs';
-
-
 
 export const numberToColumn = (n) => {
   const res = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[n % 26];

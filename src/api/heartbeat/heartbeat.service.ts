@@ -4,26 +4,26 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
 import { cleanup, convertFilterStringToArray, MESS_CODE, t } from '@utils';
-import { CreateBmiDto, FilterBmiDto, UpdateBmiDto } from './dto';
+import { CreateHeartBeatDto, FilterHeartbeatDto, UpdateHeartbeatDto } from './dto';
 
 @Injectable()
-export class BmiService {
+export class HeartbeartService {
   constructor(private prismaService: PrismaService) {}
 
-  async checkBmiExist(id) {
-    const bmi = await this.prismaService.bmi.findFirst({
+  async checkBloodPressureExist(id) {
+    const heartbeat = await this.prismaService.heartbeat.findFirst({
       where: {
         id: id,
         isDeleted: false,
       },
     });
-    return bmi;
+    return heartbeat;
   }
 
-  async findAll(dto: FilterBmiDto, pagination: Pagination) {
+  async findAll(dto: FilterHeartbeatDto, pagination: Pagination) {
     try {
       const { skip, take } = pagination;
-      let where: Prisma.BmiWhereInput = {
+      let where: Prisma.HeartbeatWhereInput = {
         isDeleted: false,
       };
 
@@ -74,11 +74,11 @@ export class BmiService {
 
   async findOne(id: string) {
     try {
-      const exist = await this.checkBmiExist({ id });
+      const exist = await this.checkBloodPressureExist({ id });
       if (!exist)
-        throw new BadRequestException(t(MESS_CODE['BMI_NOT_FOUND'], {}));
+        throw new BadRequestException(t(MESS_CODE['HEARTBEAT_NOT_FOUND'], {}));
 
-      const data = await this.prismaService.bmi.findFirst({
+      const data = await this.prismaService.heartbeat.findFirst({
         where: {
           id,
           isDeleted: false,
@@ -90,20 +90,17 @@ export class BmiService {
     }
   }
 
-  async create(memberId: string, dto: CreateBmiDto) {
+  async create(memberId: string, dto: CreateHeartBeatDto) {
     try {
-      const { height, weight, healthRecordId } = dto;
-      if (Number(height) < 0) {
-        throw new BadRequestException(t(MESS_CODE['INVALID_HEIGHT']));
+      const { heartRateIndicator, healthRecordId } = dto;
+      if (Number(heartRateIndicator) < 0) {
+        throw new BadRequestException(t(MESS_CODE['INVALID_HEART_RATE_INDICATOR']));
       }
-      if (Number(weight) < 0) {
-        throw new BadRequestException(t(MESS_CODE['INVALID_WEIGHT']));
-      }
+      
 
-      const data = await this.prismaService.bmi.create({
+      const data = await this.prismaService.heartbeat.create({
         data: {
-          weight,
-          height,
+          heartRateIndicator,
           healthRecordId,
           createdBy: memberId,
         },
@@ -112,25 +109,21 @@ export class BmiService {
     } catch (error) {}
   }
 
-  async update(memberId: string, id: string, dto: UpdateBmiDto) {
+  async update(memberId: string, id: string, dto: UpdateHeartbeatDto) {
     try {
-      const { height, weight } = dto;
-      const exist = await this.checkBmiExist({ id });
+      const { heartRateIndicator } = dto;
+      const exist = await this.checkBloodPressureExist({ id });
       if (!exist)
-        throw new BadRequestException(t(MESS_CODE['BMI_NOT_FOUND'], {}));
+        throw new BadRequestException(t(MESS_CODE['HEARTBEAT_NOT_FOUND'], {}));
 
-      if (Number(height) < 0) {
-        throw new BadRequestException(t(MESS_CODE['INVALID_HEIGHT']));
-      }
-      if (Number(weight) < 0) {
-        throw new BadRequestException(t(MESS_CODE['INVALID_WEIGHT']));
-      }
+        if (Number(heartRateIndicator) < 0) {
+          throw new BadRequestException(t(MESS_CODE['INVALID_HEART_RATE_INDICATOR']));
+        }
 
-      const data = await this.prismaService.bmi.update({
+      const data = await this.prismaService.heartbeat.update({
         where: { id },
         data: {
-          weight,
-          height,
+          heartRateIndicator,
           updatedBy: memberId,
         },
       });
@@ -141,10 +134,10 @@ export class BmiService {
 
   async delete(memberId: string, id: string) {
     try {
-      const exist = await this.checkBmiExist({ id });
+      const exist = await this.checkBloodPressureExist({ id });
       if (!exist)
-        throw new BadRequestException(t(MESS_CODE['BMI_NOT_FOUND'], {}));
-      const data = await this.prismaService.bmi.update({
+        throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
+      const data = await this.prismaService.heartbeat.update({
         where: { id },
         data: {
           isDeleted: true,
