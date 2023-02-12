@@ -208,7 +208,7 @@ model HealthRecord {
   deletedBy String?  @db.VarChar(32)
 
   patient       Patient?        @relation("health_record_patient", fields: [patientId], references: [id], onDelete: Cascade)
-  bmi           Bmi?            @relation("health_record_bmi")
+  bmi           Bmi[]           @relation("health_record_bmi")
   bloodPressure BloodPressure[] @relation("health_record_blood_pressure")
   heartbeat     Heartbeat[]     @relation("health_record_heartbeat")
   glucose       Glucose[]       @relation("health_record_glucose")
@@ -219,9 +219,9 @@ model Bmi {
   id       String  @id @default(cuid()) @db.VarChar(32)
   height   String? @db.VarChar(255)
   weight   String? @db.VarChar(255)
-  indexBmi String? @db.VarChar(32)
+  indexBmi String? @db.VarChar(255)
 
-  healthRecordId String? @unique @db.VarChar(32)
+  healthRecordId String? @db.VarChar(32)
 
   createdAt DateTime @default(now())
   createdBy String?  @db.VarChar(32)

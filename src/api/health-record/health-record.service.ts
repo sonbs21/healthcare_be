@@ -151,8 +151,7 @@ export class HealthRecordService {
           },
         },
       });
-      const indexBmi:any = funcIndexBmi(Number(height), Number(weight));
-
+      const indexBmi: any = funcIndexBmi(Number(height), Number(weight));
       await this.prismaService.$transaction(async (prisma) => {
         if (!bmiExist) {
           await prisma.bmi.create({
@@ -160,7 +159,7 @@ export class HealthRecordService {
               healthRecordId: heathRecord.id,
               height,
               weight,
-              indexBmi: indexBmi,
+              indexBmi: `${indexBmi.toFixed(5)}`,
 
               createdBy: memberId,
             },
@@ -173,6 +172,7 @@ export class HealthRecordService {
             data: {
               height,
               weight,
+              indexBmi: `${indexBmi.toFixed(5)}`,
               updatedBy: memberId,
             },
           });
@@ -263,6 +263,7 @@ export class HealthRecordService {
         return ResponseSuccess({}, MESS_CODE['SUCCESS'], {});
       });
     } catch (err) {
+      console.log('er', err.message);
       throw new BadRequestException(err.message);
     }
   }
