@@ -31,7 +31,7 @@ export class PatientService {
       const whereOR = [];
 
       if (dto.search) {
-        whereAND.push({
+        whereOR.push({
           OR: [
             { name: { contains: dto?.search } },
             { email: { contains: dto?.search } },

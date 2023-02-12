@@ -18,14 +18,14 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { CreateHeartBeatDto, UpdateHeartbeatDto } from './dto';
-import { HeartbeartService } from './heartbeat.service';
+import { HeartbeatService } from './heartbeat.service';
 
 @Controller('v1')
 @ApiTags('Heartbeat')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class HeartbeatController {
-  constructor(private readonly heartbeatService: HeartbeartService) {}
+  constructor(private readonly heartbeatService: HeartbeatService) {}
 
   @Get('heartbeats')
   @HttpCode(HttpStatus.OK)

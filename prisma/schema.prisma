@@ -156,10 +156,10 @@ model Message {
 
 model Notification {
   id               String            @id @default(cuid()) @db.VarChar(32)
-  title            String?            @db.VarChar(255)
+  title            String?           @db.VarChar(255)
   typeNotification TypeNotification? @default(SYSTEM)
-  content          String?            @db.VarChar(255)
-  isRead           Boolean?           @default(false) @db.TinyInt()
+  content          String?           @db.VarChar(255)
+  isRead           Boolean?          @default(false) @db.TinyInt()
 
   userId String? @db.VarChar(32)
 
@@ -186,10 +186,8 @@ model NotificationApointment {
   deletedBy String?  @db.VarChar(32)
 }
 
-model Appointment{
-  id              String    @id @default(cuid()) @db.VarChar(32)
-  
-
+model Appointment {
+  id String @id @default(cuid()) @db.VarChar(32)
 }
 
 model HealthRecord {
@@ -211,6 +209,8 @@ model HealthRecord {
   bmi           Bmi?            @relation("health_record_bmi")
   bloodPressure BloodPressure[] @relation("health_record_blood_pressure")
   heartbeat     Heartbeat[]     @relation("health_record_heartbeat")
+  glucose       Glucose[]        @relation("health_record_glucose")
+  cholesterol   Cholesterol[]   @relation("health_record_cholesterol")
 }
 
 model Bmi {
@@ -261,4 +261,36 @@ model Heartbeat {
   deletedBy String?  @db.VarChar(32)
 
   healthRecord HealthRecord? @relation("health_record_heartbeat", fields: [healthRecordId], references: [id], onDelete: Cascade)
+}
+
+model Cholesterol {
+  id          String @id @default(cuid()) @db.VarChar(32)
+  cholesterol String @db.VarChar(255)
+
+  healthRecordId String? @db.VarChar(32)
+
+  createdAt DateTime @default(now())
+  createdBy String?  @db.VarChar(32)
+  updatedAt DateTime @updatedAt
+  updatedBy String?  @db.VarChar(32)
+  isDeleted Boolean  @default(false) @db.TinyInt()
+  deletedBy String?  @db.VarChar(32)
+
+  healthRecord HealthRecord? @relation("health_record_cholesterol", fields: [healthRecordId], references: [id], onDelete: Cascade)
+}
+
+model Glucose {
+  id      String @id @default(cuid()) @db.VarChar(32)
+  glucose String @db.VarChar(255)
+
+  healthRecordId String? @db.VarChar(32)
+
+  createdAt DateTime @default(now())
+  createdBy String?  @db.VarChar(32)
+  updatedAt DateTime @updatedAt
+  updatedBy String?  @db.VarChar(32)
+  isDeleted Boolean  @default(false) @db.TinyInt()
+  deletedBy String?  @db.VarChar(32)
+
+  healthRecord HealthRecord? @relation("health_record_glucose", fields: [healthRecordId], references: [id], onDelete: Cascade)
 }

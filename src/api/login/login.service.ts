@@ -33,19 +33,10 @@ export class LoginUserService {
           // status: Status.ACTIVE,
         },
       });
-      if (!phoneExist)
-        throw new BadRequestException(
-          t(MESS_CODE['PHONE_OR_PASSWORD_INCORRECT']),
-        );
+      if (!phoneExist) throw new BadRequestException(t(MESS_CODE['PHONE_OR_PASSWORD_INCORRECT']));
 
-      const isPasswordMatch = await this.bcryptService.compare(
-        dto.password,
-        phoneExist.password,
-      );
-      if (!isPasswordMatch)
-        throw new BadRequestException(
-          t(MESS_CODE['PHONE_OR_PASSWORD_INCORRECT']),
-        );
+      const isPasswordMatch = await this.bcryptService.compare(dto.password, phoneExist.password);
+      if (!isPasswordMatch) throw new BadRequestException(t(MESS_CODE['PHONE_OR_PASSWORD_INCORRECT']));
 
       const data = await this.authService.login(phoneExist);
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
@@ -86,8 +77,7 @@ export class LoginUserService {
           isDeleted: false,
         },
       });
-      if (userEmailExist)
-        throw new BadRequestException(t(MESS_CODE['EMAIL_EXIST']));
+      if (userEmailExist) throw new BadRequestException(t(MESS_CODE['EMAIL_EXIST']));
 
       if (dto?.password.length < 6) {
         throw new BadRequestException(t(MESS_CODE['PASSWORD_INVALID']));
@@ -135,10 +125,9 @@ export class LoginUserService {
 
   async registerPatient(dto: RegisterPatientDto) {
     try {
+      console.log('RegisterPatientDto', dto?.password.length < 6);
       // Generate password
       // const randomPassword = randomize('Aa0', 8);
-      const hash = await this.bcryptService.hash(dto.password);
-      delete dto.password;
 
       // Check for user exists
       const userExist = await this.prismaService.user.findFirst({
@@ -152,6 +141,8 @@ export class LoginUserService {
       if (dto?.password.length < 6) {
         throw new BadRequestException(t(MESS_CODE['PASSWORD_INVALID']));
       }
+      const hash = await this.bcryptService.hash(dto.password);
+      delete dto.password;
 
       const data = await this.prismaService.$transaction(async (prisma) => {
         // Check for role exists
@@ -174,11 +165,12 @@ export class LoginUserService {
           },
         });
 
-        // await prisma.healthRecord.create({
-        //   data:{
-        //     patient: { connect: { id: patient.id } },
-        //   }
-        // })
+        await prisma.healthRecord.create({
+          data: {
+            patientId: patient.id,
+            createdBy: patient.id,
+          },
+        });
 
         await prisma.user.update({
           where: {

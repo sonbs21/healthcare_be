@@ -1,20 +1,11 @@
+/* eslint-disable prettier/prettier */
 import { JwtAuthGuard } from '@auth/guards';
 import { CurrentUser, Paginate } from '@decorators';
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Patch,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { DoctorService } from './doctor.service';
-import { FilterDoctorsDto, UpdateDoctorDto } from './dto';
+import { FilterDoctorsDto, FilterPatientsWithDoctorIdDto, UpdateDoctorDto } from './dto';
 
 @Controller('v1')
 @ApiTags('Doctors')
@@ -25,7 +16,7 @@ export class DoctorController {
 
   @Get('doctors')
   @HttpCode(HttpStatus.OK)
-  findAll( @Query() dto: FilterDoctorsDto, @Paginate() pagination: Pagination) {
+  findAll(@Query() dto: FilterDoctorsDto, @Paginate() pagination: Pagination) {
     return this.doctorService.findAll(dto, pagination);
   }
 
@@ -35,11 +26,15 @@ export class DoctorController {
     return this.doctorService.findOne(id);
   }
 
-
   @Patch('doctor/:id')
   @HttpCode(HttpStatus.OK)
-  update( @Param('id') id: string, @Body() dto: UpdateDoctorDto) {
+  update(@Param('id') id: string, @Body() dto: UpdateDoctorDto) {
     return this.doctorService.update(id, dto);
   }
 
+  @Get('doctor/patients')
+  @HttpCode(HttpStatus.OK)
+  getAllPatient(@CurrentUser() user, @Query() dto: FilterPatientsWithDoctorIdDto, @Paginate() pagination: Pagination) {
+    return this.doctorService.getAllPatient(user['memberId'], dto, pagination);
+  }
 }

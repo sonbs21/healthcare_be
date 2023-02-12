@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Status } from '@prisma/client';
 import { Transform } from 'class-transformer';

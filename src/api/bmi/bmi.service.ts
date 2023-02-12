@@ -50,8 +50,8 @@ export class BmiService {
       where = cleanup(where);
 
       const [total, data] = await this.prismaService.$transaction([
-        this.prismaService.conversation.count({ where }),
-        this.prismaService.conversation.findMany({
+        this.prismaService.bmi.count({ where }),
+        this.prismaService.bmi.findMany({
           where,
           select: {
             id: true,

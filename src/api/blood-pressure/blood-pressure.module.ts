@@ -9,4 +9,4 @@ import { BloodPressureService } from './blood-pressure.service';
   providers: [BloodPressureService],
   exports: [BloodPressureService],
 })
-export class BmiModule {}
+export class BloodPressureModule {}

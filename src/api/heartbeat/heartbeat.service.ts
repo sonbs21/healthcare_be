@@ -7,7 +7,7 @@ import { cleanup, convertFilterStringToArray, MESS_CODE, t } from '@utils';
 import { CreateHeartBeatDto, FilterHeartbeatDto, UpdateHeartbeatDto } from './dto';
 
 @Injectable()
-export class HeartbeartService {
+export class HeartbeatService {
   constructor(private prismaService: PrismaService) {}
 
   async checkBloodPressureExist(id) {
@@ -50,8 +50,8 @@ export class HeartbeartService {
       where = cleanup(where);
 
       const [total, data] = await this.prismaService.$transaction([
-        this.prismaService.conversation.count({ where }),
-        this.prismaService.conversation.findMany({
+        this.prismaService.heartbeat.count({ where }),
+        this.prismaService.heartbeat.findMany({
           where,
           select: {
             id: true,

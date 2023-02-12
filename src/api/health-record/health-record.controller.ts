@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { JwtAuthGuard } from '@auth/guards';
 import { CurrentUser, Paginate } from '@decorators';
 import {
@@ -16,6 +17,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { FilterHealthRecordDto } from './dto';
+import { CreateHealthRecordDto } from './dto/create-health-record.dto';
 import { HealthRecordService } from './health-record.service';
 
 @Controller('v1')
@@ -27,8 +29,8 @@ export class HealthRecordController {
 
   @Get('health-record-member')
   @HttpCode(HttpStatus.OK)
-  findHealthRecordWithId(@CurrentUser() user,@Query() dto: FilterHealthRecordDto) {
-    return this.healthRecordService.findHealthRecordWithId(user['memberId'],dto);
+  findHealthRecordWithId(@CurrentUser() user, @Query() dto: FilterHealthRecordDto) {
+    return this.healthRecordService.findHealthRecordWithId(user['memberId'], dto);
   }
 
   @Get('health-records')
@@ -43,6 +45,18 @@ export class HealthRecordController {
     return this.healthRecordService.findOne(id);
   }
 
+  @Post('health-record')
+  @HttpCode(HttpStatus.CREATED)
+  create(@CurrentUser() user, @Body() dto: CreateHealthRecordDto) {
+    return this.healthRecordService.create(user['memberId'], dto);
+  }
+
+  @Patch('health-record/:id')
+  @HttpCode(HttpStatus.OK)
+  update(@CurrentUser() user, @Param('id') id: string, @Body() dto: CreateHealthRecordDto) {
+    return this.healthRecordService.create(user['memberId'], dto);
+  }
+
   // @Patch('feature/:id')
   // @HttpCode(HttpStatus.OK)
   // update(@CurrentUser() user, @Param('id') id: string, @Body() dto: UpdateFeatureDto, @Headers() header) {
@@ -55,4 +69,3 @@ export class HealthRecordController {
   //   return this.featuresService.remove(user['id'], id, header['language']);
   // }
 }
-
