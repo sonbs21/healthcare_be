@@ -28,10 +28,7 @@ export class BloodPressureService {
       };
 
       if (dto?.search) {
-        where.OR = [
-          { id: { contains: dto?.search.trim() } },
-          { healthRecordId: { contains: dto?.search.trim() } },
-        ];
+        where.OR = [{ id: { contains: dto?.search.trim() } }, { healthRecordId: { contains: dto?.search.trim() } }];
       }
       const ids = convertFilterStringToArray(dto.ids);
       if (ids && ids.length > 0) {
@@ -75,8 +72,7 @@ export class BloodPressureService {
   async findOne(id: string) {
     try {
       const exist = await this.checkBloodPressureExist({ id });
-      if (!exist)
-        throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
+      if (!exist) throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
 
       const data = await this.prismaService.bloodPressure.findFirst({
         where: {
@@ -85,6 +81,36 @@ export class BloodPressureService {
         },
       });
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  async getBloodPressure(memberId: string, pagination: Pagination) {
+    try {
+      const { skip, take } = pagination;
+
+      const healthRecord = await this.prismaService.healthRecord.findFirst({
+        where: { patientId: memberId },
+        select: { id: true },
+      });
+
+      const [total, data] = await this.prismaService.$transaction([
+        this.prismaService.bloodPressure.count({ where: { healthRecordId: healthRecord.id } }),
+        this.prismaService.bloodPressure.findMany({
+          where: { healthRecordId: healthRecord.id },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          skip: skip,
+          take: take,
+        }),
+      ]);
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
+        pagination: pagination,
+        total,
+      });
     } catch (err) {
       throw new BadRequestException(err.message);
     }
@@ -116,8 +142,7 @@ export class BloodPressureService {
     try {
       const { systolic, diastolic } = dto;
       const exist = await this.checkBloodPressureExist({ id });
-      if (!exist)
-        throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
+      if (!exist) throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
 
       if (Number(systolic) < 0) {
         throw new BadRequestException(t(MESS_CODE['INVALID_SYSTOLIC']));
@@ -142,8 +167,7 @@ export class BloodPressureService {
   async delete(memberId: string, id: string) {
     try {
       const exist = await this.checkBloodPressureExist({ id });
-      if (!exist)
-        throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
+      if (!exist) throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
       const data = await this.prismaService.bloodPressure.update({
         where: { id },
         data: {

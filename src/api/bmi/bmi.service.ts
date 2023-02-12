@@ -28,10 +28,7 @@ export class BmiService {
       };
 
       if (dto?.search) {
-        where.OR = [
-          { id: { contains: dto?.search.trim() } },
-          { healthRecordId: { contains: dto?.search.trim() } },
-        ];
+        where.OR = [{ id: { contains: dto?.search.trim() } }, { healthRecordId: { contains: dto?.search.trim() } }];
       }
       const ids = convertFilterStringToArray(dto.ids);
       if (ids && ids.length > 0) {
@@ -75,8 +72,7 @@ export class BmiService {
   async findOne(id: string) {
     try {
       const exist = await this.checkBmiExist({ id });
-      if (!exist)
-        throw new BadRequestException(t(MESS_CODE['BMI_NOT_FOUND'], {}));
+      if (!exist) throw new BadRequestException(t(MESS_CODE['BMI_NOT_FOUND'], {}));
 
       const data = await this.prismaService.bmi.findFirst({
         where: {
@@ -85,6 +81,36 @@ export class BmiService {
         },
       });
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  async getBmi(memberId: string, pagination: Pagination) {
+    try {
+      const { skip, take } = pagination;
+
+      const healthRecord = await this.prismaService.healthRecord.findFirst({
+        where: { patientId: memberId },
+        select: { id: true },
+      });
+
+      const [total, data] = await this.prismaService.$transaction([
+        this.prismaService.bmi.count({ where: { healthRecordId: healthRecord.id } }),
+        this.prismaService.bmi.findMany({
+          where: { healthRecordId: healthRecord.id },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          skip: skip,
+          take: take,
+        }),
+      ]);
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
+        pagination: pagination,
+        total,
+      });
     } catch (err) {
       throw new BadRequestException(err.message);
     }
@@ -116,8 +142,7 @@ export class BmiService {
     try {
       const { height, weight } = dto;
       const exist = await this.checkBmiExist({ id });
-      if (!exist)
-        throw new BadRequestException(t(MESS_CODE['BMI_NOT_FOUND'], {}));
+      if (!exist) throw new BadRequestException(t(MESS_CODE['BMI_NOT_FOUND'], {}));
 
       if (Number(height) < 0) {
         throw new BadRequestException(t(MESS_CODE['INVALID_HEIGHT']));
@@ -142,8 +167,7 @@ export class BmiService {
   async delete(memberId: string, id: string) {
     try {
       const exist = await this.checkBmiExist({ id });
-      if (!exist)
-        throw new BadRequestException(t(MESS_CODE['BMI_NOT_FOUND'], {}));
+      if (!exist) throw new BadRequestException(t(MESS_CODE['BMI_NOT_FOUND'], {}));
       const data = await this.prismaService.bmi.update({
         where: { id },
         data: {

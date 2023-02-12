@@ -39,6 +39,12 @@ export class CholesterolController {
     return this.cholesterolService.findOne(id);
   }
 
+  @Get('get-cholesterol')
+  @HttpCode(HttpStatus.OK)
+  getCholesterol(@CurrentUser() user, @Paginate() pagination: Pagination) {
+    return this.cholesterolService.getCholesterol(user['memberID'], pagination);
+  }
+
   @Post('cholesterol')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateCholesterolDto) {

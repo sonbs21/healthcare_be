@@ -38,6 +38,12 @@ export class GlucoseController {
     return this.glucoseService.findOne(id);
   }
 
+  @Get('get-glucose')
+  @HttpCode(HttpStatus.OK)
+  getGlucose(@CurrentUser() user, @Paginate() pagination: Pagination) {
+    return this.glucoseService.getGlucose(user['memberID'], pagination);
+  }
+
   @Post('glucose')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateGlucoseDto) {

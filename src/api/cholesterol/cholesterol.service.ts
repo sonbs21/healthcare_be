@@ -86,6 +86,36 @@ export class CholesterolService {
     }
   }
 
+  async getCholesterol(memberId: string, pagination: Pagination) {
+    try {
+      const { skip, take } = pagination;
+
+      const healthRecord = await this.prismaService.healthRecord.findFirst({
+        where: { patientId: memberId },
+        select: { id: true },
+      });
+
+      const [total, data] = await this.prismaService.$transaction([
+        this.prismaService.cholesterol.count({ where: { healthRecordId: healthRecord.id } }),
+        this.prismaService.cholesterol.findMany({
+          where: { healthRecordId: healthRecord.id },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          skip: skip,
+          take: take,
+        }),
+      ]);
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
+        pagination: pagination,
+        total,
+      });
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
   async create(memberId: string, dto: CreateCholesterolDto) {
     try {
       const { cholesterol, healthRecordId } = dto;

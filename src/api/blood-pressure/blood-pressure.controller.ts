@@ -39,25 +39,27 @@ export class BloodPressureController {
     return this.bloodPressureService.findOne(id);
   }
 
+  @Get('get-blood-pressure')
+  @HttpCode(HttpStatus.OK)
+  getBloodPressure(@CurrentUser() user, @Paginate() pagination: Pagination) {
+    return this.bloodPressureService.getBloodPressure(user['memberID'], pagination);
+  }
+
   @Post('blood-pressure')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateBloodPressureDto) {
-    return this.bloodPressureService.create(user['memberID'],dto);
+    return this.bloodPressureService.create(user['memberID'], dto);
   }
 
   @Patch('blood-pressure/:id')
   @HttpCode(HttpStatus.OK)
-  update(
-    @CurrentUser() user,
-    @Param('id') id: string,
-    @Body() dto: UpdateBloodPressureDto,
-  ) {
-    return this.bloodPressureService.update(user['memberId'],id,dto);
+  update(@CurrentUser() user, @Param('id') id: string, @Body() dto: UpdateBloodPressureDto) {
+    return this.bloodPressureService.update(user['memberId'], id, dto);
   }
 
   @Delete('blood-pressure/:id')
   @HttpCode(HttpStatus.OK)
   remove(@CurrentUser() user, @Param('id') id: string, @Headers() header) {
-    return this.bloodPressureService.delete(user['memberId'],id);
+    return this.bloodPressureService.delete(user['memberId'], id);
   }
 }

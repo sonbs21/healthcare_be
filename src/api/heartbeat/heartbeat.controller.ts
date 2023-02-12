@@ -45,6 +45,12 @@ export class HeartbeatController {
     return this.heartbeatService.create(user['memberID'],dto);
   }
 
+  @Get('get-heartbeat')
+  @HttpCode(HttpStatus.OK)
+  getHeartbeat(@CurrentUser() user, @Paginate() pagination: Pagination) {
+    return this.heartbeatService.getHeartbeat(user['memberID'], pagination);
+  }
+
   @Patch('heartbeat/:id')
   @HttpCode(HttpStatus.OK)
   update(
