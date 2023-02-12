@@ -77,6 +77,7 @@ model Doctor {
   gender      Gender?
   dateOfBirth DateTime?
   address     String?   @db.Text()
+  phone       String?   @db.VarChar(255)
   email       String?   @db.VarChar(255)
   avatar      String?   @db.VarChar(255)
   description String?   @db.VarChar(255)
@@ -100,6 +101,7 @@ model Patient {
   fullName        String    @db.VarChar(255)
   gender          Gender?
   dateOfBirth     DateTime?
+  phone           String?   @db.VarChar(255)
   address         String?   @db.Text()
   avatar          String?   @db.VarChar(255)
   job             String?   @db.VarChar(255)
@@ -209,7 +211,7 @@ model HealthRecord {
   bmi           Bmi?            @relation("health_record_bmi")
   bloodPressure BloodPressure[] @relation("health_record_blood_pressure")
   heartbeat     Heartbeat[]     @relation("health_record_heartbeat")
-  glucose       Glucose[]        @relation("health_record_glucose")
+  glucose       Glucose[]       @relation("health_record_glucose")
   cholesterol   Cholesterol[]   @relation("health_record_cholesterol")
 }
 

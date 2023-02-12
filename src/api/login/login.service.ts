@@ -95,8 +95,6 @@ export class LoginUserService {
           },
         });
 
-        delete dto.phone;
-
         const doctor = await prisma.doctor.create({
           data: {
             ...dto,
@@ -155,8 +153,6 @@ export class LoginUserService {
             password: hash,
           },
         });
-
-        delete dto.phone;
 
         const patient = await prisma.patient.create({
           data: {

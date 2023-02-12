@@ -1,11 +1,8 @@
+/* eslint-disable prettier/prettier */
 import { UsersService } from '@api/users/users.service';
 import { JwtAuthGuard } from '@auth/guards';
 import { CurrentUser } from '@decorators';
-import {
-  Controller,
-  Get,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 @Controller('v1/user')
 @ApiTags('Users')
@@ -14,11 +11,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-
   @Get('me')
   getMe(@CurrentUser() user) {
     return this.usersService.getMe(user['id']);
   }
-
-
 }

@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { MESS_CODE } from '@/utils';
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Role } from '@prisma/client';
 import { BcryptService, PrismaService } from '@services';
 import { ResponseSuccess } from '../../types/response';
 @Injectable()
@@ -27,19 +28,35 @@ export class UsersService {
 
   async getMe(userId: string) {
     try {
-      const data = await this.prismaService.user.findFirst({
+      const select = {
+        id: true,
+        phone: true,
+        memberId: true,
+        role: true,
+      };
+      const me = await this.prismaService.user.findFirst({
         where: {
           id: userId,
           isDeleted: false,
         },
         select: {
-          id: true,
-          phone: true,
-          memberId: true,
-          doctor: true,
-          patient: true,
+          role: true,
         },
       });
+      if (me['role'] === Role.PATIENT) {
+        select['patient'] = true;
+      } else {
+        select['doctor'] = true;
+      }
+
+      const data = await this.prismaService.user.findFirst({
+        where: {
+          id: userId,
+          isDeleted: false,
+        },
+        select: select,
+      });
+
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       throw new BadRequestException(err.message);

@@ -6,7 +6,6 @@ import {
   Controller,
   Delete,
   Get,
-  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -63,7 +62,7 @@ export class HeartbeatController {
 
   @Delete('heartbeat/:id')
   @HttpCode(HttpStatus.OK)
-  remove(@CurrentUser() user, @Param('id') id: string, @Headers() header) {
+  remove(@CurrentUser() user, @Param('id') id: string) {
     return this.heartbeatService.delete(user['memberId'],id);
   }
 }
