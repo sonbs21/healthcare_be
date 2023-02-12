@@ -41,7 +41,7 @@ export class HealthRecordController {
 
   @Get('health-record/:id')
   @HttpCode(HttpStatus.OK)
-  findOne(@Param('id') id: string, @Headers() header) {
+  findOne(@Param('id') id: string) {
     return this.healthRecordService.findOne(id);
   }
 
@@ -49,6 +49,12 @@ export class HealthRecordController {
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateHealthRecordDto) {
     return this.healthRecordService.create(user['memberId'], dto);
+  }
+
+  @Get('health-record-day')
+  @HttpCode(HttpStatus.OK)
+  findHealthRecordDay(@CurrentUser() user) {
+    return this.healthRecordService.findHealthRecordDay(user['memberId']);
   }
 
   @Patch('health-record/:id')

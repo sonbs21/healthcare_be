@@ -6,11 +6,6 @@ export class CreateHealthRecordDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ example: '' })
-  healthRecordId?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ example: '' })
   height?: string;
 
   @IsString()

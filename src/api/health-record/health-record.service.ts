@@ -85,9 +85,7 @@ export class HealthRecordService {
 
   async create(memberId: string, dto: CreateHealthRecordDto) {
     try {
-      console.log('gday', moment().startOf('d').toISOString());
-
-      const { healthRecordId, height, weight, cholesterol, systolic, diastolic, glucose, heartRateIndicator } = dto;
+      const { height, weight, cholesterol, systolic, diastolic, glucose, heartRateIndicator } = dto;
       if (!Number(height) && Number(height) <= 0) throw new BadRequestException(t(MESS_CODE['INVALID_HEIGHT']));
       if (!Number(weight) && Number(weight) <= 0) throw new BadRequestException(t(MESS_CODE['INVALID_WEIGHT']));
       if (!Number(cholesterol) && Number(cholesterol) <= 0)
@@ -99,11 +97,14 @@ export class HealthRecordService {
       if (!Number(heartRateIndicator) && Number(heartRateIndicator) <= 0)
         throw new BadRequestException(t(MESS_CODE['INVALID_HEARTBEAT']));
 
-      const isExist = await this.prismaService.healthRecord.findFirst({ where: { id: healthRecordId } });
-      if (!isExist) throw new BadRequestException(t(MESS_CODE['HEALTH_RECORD_NOT_FOUND']));
+      const heathRecord = await this.prismaService.healthRecord.findFirst({
+        where: { patientId: memberId },
+        select: { id: true },
+      });
 
       const bmiExist = await this.prismaService.bmi.findFirst({
         where: {
+          healthRecordId: heathRecord.id,
           createdAt: {
             gte: moment().startOf('D').toISOString(),
             lte: moment().endOf('D').toISOString(),
@@ -113,6 +114,7 @@ export class HealthRecordService {
 
       const cholesterolExist = await this.prismaService.cholesterol.findFirst({
         where: {
+          healthRecordId: heathRecord.id,
           createdAt: {
             gte: moment().startOf('D').toISOString(),
             lte: moment().endOf('D').toISOString(),
@@ -122,6 +124,7 @@ export class HealthRecordService {
 
       const heartbeatExist = await this.prismaService.heartbeat.findFirst({
         where: {
+          healthRecordId: heathRecord.id,
           createdAt: {
             gte: moment().startOf('D').toISOString(),
             lte: moment().endOf('D').toISOString(),
@@ -131,6 +134,7 @@ export class HealthRecordService {
 
       const glucoseExist = await this.prismaService.glucose.findFirst({
         where: {
+          healthRecordId: heathRecord.id,
           createdAt: {
             gte: moment().startOf('D').toISOString(),
             lte: moment().endOf('D').toISOString(),
@@ -140,6 +144,7 @@ export class HealthRecordService {
 
       const bloodPressureExist = await this.prismaService.bloodPressure.findFirst({
         where: {
+          healthRecordId: heathRecord.id,
           createdAt: {
             gte: moment().startOf('D').toISOString(),
             lte: moment().endOf('D').toISOString(),
@@ -151,7 +156,7 @@ export class HealthRecordService {
         if (!bmiExist) {
           await prisma.bmi.create({
             data: {
-              healthRecordId,
+              healthRecordId: heathRecord.id,
               height,
               weight,
               createdBy: memberId,
@@ -173,7 +178,7 @@ export class HealthRecordService {
         if (!cholesterolExist) {
           await prisma.cholesterol.create({
             data: {
-              healthRecordId,
+              healthRecordId: heathRecord.id,
               cholesterol,
               createdBy: memberId,
             },
@@ -193,7 +198,7 @@ export class HealthRecordService {
         if (!glucoseExist) {
           await prisma.glucose.create({
             data: {
-              healthRecordId,
+              healthRecordId: heathRecord.id,
               glucose,
               createdBy: memberId,
             },
@@ -213,7 +218,7 @@ export class HealthRecordService {
         if (!heartbeatExist) {
           await prisma.heartbeat.create({
             data: {
-              healthRecordId,
+              healthRecordId: heathRecord.id,
               heartRateIndicator,
               createdBy: memberId,
             },
@@ -233,7 +238,7 @@ export class HealthRecordService {
         if (!bloodPressureExist) {
           await prisma.bloodPressure.create({
             data: {
-              healthRecordId,
+              healthRecordId: heathRecord.id,
               systolic,
               diastolic,
               createdBy: memberId,
@@ -254,6 +259,121 @@ export class HealthRecordService {
 
         return ResponseSuccess({}, MESS_CODE['SUCCESS'], {});
       });
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  async findHealthRecordDay(memberId: string) {
+    try {
+      // const exist = await this.checkFeatureExist({ id });
+      // if (!exist) throw new BadRequestException(t(MESS_CODE['FEATURE_NOT_FOUND'], language));
+
+      const data = {};
+      const healthRecord = await this.prismaService.healthRecord.findFirst({
+        where: {
+          patientId: memberId,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      data['healthRecordId'] = healthRecord.id;
+
+      const bmi = await this.prismaService.bmi.findFirst({
+        where: {
+          healthRecordId: healthRecord.id,
+          createdAt: {
+            gte: moment().startOf('D').toISOString(),
+            lte: moment().endOf('D').toISOString(),
+          },
+        },
+        select: {
+          height: true,
+          weight: true,
+        },
+      });
+
+      if (bmi.height) {
+        data['height'] = bmi.height;
+      }
+      if (bmi.weight) {
+        data['weight'] = bmi.weight;
+      }
+
+      const heartbeat = await this.prismaService.heartbeat.findFirst({
+        where: {
+          healthRecordId: healthRecord.id,
+          createdAt: {
+            gte: moment().startOf('D').toISOString(),
+            lte: moment().endOf('D').toISOString(),
+          },
+        },
+        select: {
+          heartRateIndicator: true,
+        },
+      });
+
+      if (heartbeat.heartRateIndicator) {
+        data['heartbeat'] = heartbeat.heartRateIndicator;
+      }
+
+      const bloodPressure = await this.prismaService.bloodPressure.findFirst({
+        where: {
+          healthRecordId: healthRecord.id,
+          createdAt: {
+            gte: moment().startOf('D').toISOString(),
+            lte: moment().endOf('D').toISOString(),
+          },
+        },
+        select: {
+          systolic: true,
+          diastolic: true,
+        },
+      });
+      if (bloodPressure.systolic) {
+        data['systolic'] = bloodPressure.systolic;
+      }
+      if (bloodPressure.diastolic) {
+        data['diastolic'] = bloodPressure.diastolic;
+      }
+
+      const glucose = await this.prismaService.glucose.findFirst({
+        where: {
+          healthRecordId: healthRecord.id,
+          createdAt: {
+            gte: moment().startOf('D').toISOString(),
+            lte: moment().endOf('D').toISOString(),
+          },
+        },
+        select: {
+          glucose: true,
+        },
+      });
+
+      if (glucose.glucose) {
+        data['glucose'] = glucose.glucose;
+      }
+
+      const cholesterol = await this.prismaService.cholesterol.findFirst({
+        where: {
+          healthRecordId: healthRecord.id,
+          createdAt: {
+            gte: moment().startOf('D').toISOString(),
+            lte: moment().endOf('D').toISOString(),
+          },
+        },
+        select: {
+          cholesterol: true,
+        },
+      });
+
+      if (cholesterol.cholesterol) {
+        data['cholesterol'] = cholesterol.cholesterol;
+      }
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       throw new BadRequestException(err.message);
     }
