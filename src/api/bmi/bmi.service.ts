@@ -3,7 +3,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
-import { cleanup, convertFilterStringToArray, MESS_CODE, t } from '@utils';
+import { cleanup, convertFilterStringToArray, funcIndexBmi, MESS_CODE, t } from '@utils';
 import { CreateBmiDto, FilterBmiDto, UpdateBmiDto } from './dto';
 
 @Injectable()
@@ -125,11 +125,13 @@ export class BmiService {
       if (Number(weight) < 0) {
         throw new BadRequestException(t(MESS_CODE['INVALID_WEIGHT']));
       }
+      const indexBmi: any = funcIndexBmi(Number(height), Number(weight));
 
       const data = await this.prismaService.bmi.create({
         data: {
           weight,
           height,
+          indexBmi,
           healthRecordId,
           createdBy: memberId,
         },

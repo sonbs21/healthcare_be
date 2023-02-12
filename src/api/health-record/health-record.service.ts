@@ -3,7 +3,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
-import { cleanup, MESS_CODE, t } from '@utils';
+import { cleanup, funcIndexBmi, MESS_CODE, t } from '@utils';
 import * as moment from 'moment';
 import { FilterHealthRecordDto } from './dto';
 import { CreateHealthRecordDto } from './dto/create-health-record.dto';
@@ -151,6 +151,7 @@ export class HealthRecordService {
           },
         },
       });
+      const indexBmi:any = funcIndexBmi(Number(height), Number(weight));
 
       await this.prismaService.$transaction(async (prisma) => {
         if (!bmiExist) {
@@ -159,6 +160,8 @@ export class HealthRecordService {
               healthRecordId: heathRecord.id,
               height,
               weight,
+              indexBmi: indexBmi,
+
               createdBy: memberId,
             },
           });

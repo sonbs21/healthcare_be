@@ -216,9 +216,10 @@ model HealthRecord {
 }
 
 model Bmi {
-  id     String  @id @default(cuid()) @db.VarChar(32)
-  height String? @db.VarChar(255)
-  weight String? @db.VarChar(255)
+  id       String  @id @default(cuid()) @db.VarChar(32)
+  height   String? @db.VarChar(255)
+  weight   String? @db.VarChar(255)
+  indexBmi String? @db.VarChar(32)
 
   healthRecordId String? @unique @db.VarChar(32)
 
