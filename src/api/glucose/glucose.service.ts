@@ -50,10 +50,6 @@ export class GlucoseService {
         this.prismaService.glucose.count({ where }),
         this.prismaService.glucose.findMany({
           where,
-          select: {
-            id: true,
-            // type
-          },
           orderBy: {
             createdAt: 'desc',
           },

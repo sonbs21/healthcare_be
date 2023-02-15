@@ -115,11 +115,11 @@ export class DoctorService {
 
   async getAllPatient(memberId: string, dto: FilterPatientsWithDoctorIdDto, pagination: Pagination) {
     try {
+      console.log('memberId', memberId);
       const { skip, take } = pagination;
-
       let where: Prisma.PatientWhereInput = {
         isDeleted: false,
-        doctorId:memberId
+        doctorId: memberId,
       };
 
       const whereAND = [];
@@ -167,7 +167,6 @@ export class DoctorService {
         pagination: !dto?.isAll ? pagination : undefined,
         total,
       });
-      
     } catch (err) {
       throw new BadRequestException(err.message);
     }

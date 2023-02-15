@@ -27,6 +27,13 @@ enum TypeConversation {
   GROUP
 }
 
+enum StatusAppointment {
+  CREATED
+  APPROVED
+  REFUSED
+  CANCELED
+}
+
 enum TypeMessage {
   TEXT
   IMAGE
@@ -65,8 +72,8 @@ model User {
   patientId String? @unique @db.VarChar(32)
   doctorId  String? @unique @db.VarChar(32)
 
-  doctor       Doctor?        @relation("user_doctor", fields: [doctorId], references: [id], onDelete: Cascade)
-  patient      Patient?       @relation("user_patient", fields: [patientId], references: [id], onDelete: Cascade)
+  doctor       Doctor?        @relation("user_doctor", fields: [doctorId], references: [id])
+  patient      Patient?       @relation("user_patient", fields: [patientId], references: [id])
   convesations Conversation[] @relation("user_conversation")
   notification Notification[] @relation("user_notification")
 }
@@ -85,6 +92,8 @@ model Doctor {
   workPlace   String?   @db.VarChar(255)
   specialize  String?   @db.VarChar(255)
 
+  // userId String? @db.VarChar(32)
+
   createdAt DateTime @default(now())
   createdBy String?  @db.VarChar(32)
   updatedAt DateTime @updatedAt
@@ -92,8 +101,10 @@ model Doctor {
   isDeleted Boolean  @default(false) @db.TinyInt()
   deletedBy String?  @db.VarChar(32)
 
-  user    User?     @relation("user_doctor")
-  patient Patient[] @relation("doctor_patient")
+  user         User?          @relation("user_doctor")
+  patient      Patient[]      @relation("doctor_patient")
+  conversation Conversation[] @relation("doctor_conversation")
+  appointments Appointment[]  @relation("doctor_appointments")
 }
 
 model Patient {
@@ -109,7 +120,7 @@ model Patient {
   state           String?   @db.VarChar(255)
   medicalHistory  String?   @db.VarChar(255)
 
-  doctorId String? @unique @db.VarChar(32)
+  doctorId String? @db.VarChar(32)
 
   createdAt DateTime @default(now())
   createdBy String?  @db.VarChar(32)
@@ -118,9 +129,26 @@ model Patient {
   isDeleted Boolean  @default(false) @db.TinyInt()
   deletedBy String?  @db.VarChar(32)
 
-  user       User?         @relation("user_patient")
-  doctor     Doctor?       @relation("doctor_patient", fields: [doctorId], references: [id], onDelete: Cascade)
-  healRecord HealthRecord? @relation("health_record_patient")
+  user         User?         @relation("user_patient")
+  doctor       Doctor?       @relation("doctor_patient", fields: [doctorId], references: [id])
+  healRecord   HealthRecord? @relation("health_record_patient")
+  carer        Carer[]       @relation("patient_carer")
+  appointments Appointment[] @relation("patient_appointments")
+}
+
+model Carer {
+  id       String @id @default(cuid()) @db.VarChar(32)
+  fullName String @db.VarChar(255)
+  phone    String @db.VarChar(255)
+
+  createdAt DateTime @default(now())
+  createdBy String?  @db.VarChar(32)
+  updatedAt DateTime @updatedAt
+  updatedBy String?  @db.VarChar(32)
+  isDeleted Boolean  @default(false) @db.TinyInt()
+  deletedBy String?  @db.VarChar(32)
+
+  patient Patient[] @relation("patient_carer")
 }
 
 model Conversation {
@@ -128,6 +156,8 @@ model Conversation {
   avatar           String?           @db.Text
   typeConversation TypeConversation? @default(SINGLE)
 
+  leaderId String? @db.VarChar(32)
+
   createdAt DateTime @default(now())
   createdBy String?  @db.VarChar(32)
   updatedAt DateTime @updatedAt
@@ -135,6 +165,7 @@ model Conversation {
   isDeleted Boolean  @default(false) @db.TinyInt()
   deletedBy String?  @db.VarChar(32)
 
+  doctor  Doctor?   @relation("doctor_conversation", fields: [leaderId], references: [id])
   message Message[] @relation("conversation_message")
   member  User[]    @relation("user_conversation")
 }
@@ -153,7 +184,7 @@ model Message {
   isDeleted Boolean  @default(false) @db.TinyInt()
   deletedBy String?  @db.VarChar(32)
 
-  conversation Conversation? @relation("conversation_message", fields: [conversationId], references: [id], onDelete: Cascade)
+  conversation Conversation? @relation("conversation_message", fields: [conversationId], references: [id])
 }
 
 model Notification {
@@ -172,7 +203,32 @@ model Notification {
   isDeleted Boolean  @default(false) @db.TinyInt()
   deletedBy String?  @db.VarChar(32)
 
-  user User? @relation("user_notification", fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation("user_notification", fields: [userId], references: [memberId])
+}
+
+model Appointment {
+  id                String            @id @default(cuid()) @db.VarChar(32)
+  fullName          String?           @db.Text
+  dateOfBirth       DateTime?
+  dateMeeting       DateTime?
+  phone             String?           @db.VarChar(32)
+  notes             String?           @db.VarChar(255)
+  reason            String?           @db.VarChar(255)
+  timeMeeting       String?           @db.VarChar(255)
+  statusAppointment StatusAppointment @default(CREATED)
+
+  doctorId  String? @db.VarChar(32)
+  patientId String? @db.VarChar(32)
+
+  createdAt DateTime @default(now())
+  createdBy String?  @db.VarChar(32)
+  updatedAt DateTime @updatedAt
+  updatedBy String?  @db.VarChar(32)
+  isDeleted Boolean  @default(false) @db.TinyInt()
+  deletedBy String?  @db.VarChar(32)
+
+  doctor  Doctor?  @relation("doctor_appointments", fields: [doctorId], references: [id])
+  patient Patient? @relation("patient_appointments", fields: [patientId], references: [id])
 }
 
 model NotificationApointment {
@@ -186,10 +242,6 @@ model NotificationApointment {
   updatedBy String?  @db.VarChar(32)
   isDeleted Boolean  @default(false) @db.TinyInt()
   deletedBy String?  @db.VarChar(32)
-}
-
-model Appointment {
-  id String @id @default(cuid()) @db.VarChar(32)
 }
 
 model HealthRecord {
@@ -207,7 +259,7 @@ model HealthRecord {
   isDeleted Boolean  @default(false) @db.TinyInt()
   deletedBy String?  @db.VarChar(32)
 
-  patient       Patient?        @relation("health_record_patient", fields: [patientId], references: [id], onDelete: Cascade)
+  patient       Patient?        @relation("health_record_patient", fields: [patientId], references: [id])
   bmi           Bmi[]           @relation("health_record_bmi")
   bloodPressure BloodPressure[] @relation("health_record_blood_pressure")
   heartbeat     Heartbeat[]     @relation("health_record_heartbeat")
@@ -230,13 +282,13 @@ model Bmi {
   isDeleted Boolean  @default(false) @db.TinyInt()
   deletedBy String?  @db.VarChar(32)
 
-  healthRecord HealthRecord? @relation("health_record_bmi", fields: [healthRecordId], references: [id], onDelete: Cascade)
+  healthRecord HealthRecord? @relation("health_record_bmi", fields: [healthRecordId], references: [id])
 }
 
 model BloodPressure {
-  id        String @id @default(cuid()) @db.VarChar(32)
-  systolic  String @db.VarChar(255)
-  diastolic String @db.VarChar(255)
+  id        String  @id @default(cuid()) @db.VarChar(32)
+  systolic  String? @db.VarChar(255)
+  diastolic String? @db.VarChar(255)
 
   healthRecordId String? @db.VarChar(32)
 
@@ -247,12 +299,12 @@ model BloodPressure {
   isDeleted Boolean  @default(false) @db.TinyInt()
   deletedBy String?  @db.VarChar(32)
 
-  healthRecord HealthRecord? @relation("health_record_blood_pressure", fields: [healthRecordId], references: [id], onDelete: Cascade)
+  healthRecord HealthRecord? @relation("health_record_blood_pressure", fields: [healthRecordId], references: [id])
 }
 
 model Heartbeat {
-  id                 String @id @default(cuid()) @db.VarChar(32)
-  heartRateIndicator String @db.VarChar(255)
+  id                 String  @id @default(cuid()) @db.VarChar(32)
+  heartRateIndicator String? @db.VarChar(255)
 
   healthRecordId String? @db.VarChar(32)
 
@@ -263,12 +315,12 @@ model Heartbeat {
   isDeleted Boolean  @default(false) @db.TinyInt()
   deletedBy String?  @db.VarChar(32)
 
-  healthRecord HealthRecord? @relation("health_record_heartbeat", fields: [healthRecordId], references: [id], onDelete: Cascade)
+  healthRecord HealthRecord? @relation("health_record_heartbeat", fields: [healthRecordId], references: [id])
 }
 
 model Cholesterol {
-  id          String @id @default(cuid()) @db.VarChar(32)
-  cholesterol String @db.VarChar(255)
+  id          String  @id @default(cuid()) @db.VarChar(32)
+  cholesterol String? @db.VarChar(255)
 
   healthRecordId String? @db.VarChar(32)
 
@@ -283,8 +335,8 @@ model Cholesterol {
 }
 
 model Glucose {
-  id      String @id @default(cuid()) @db.VarChar(32)
-  glucose String @db.VarChar(255)
+  id      String  @id @default(cuid()) @db.VarChar(32)
+  glucose String? @db.VarChar(255)
 
   healthRecordId String? @db.VarChar(32)
 

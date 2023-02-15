@@ -3,7 +3,7 @@ import { ResponseSuccess } from '@/types';
 import { MESS_CODE, PASSWORD_REGEX, t } from '@/utils';
 import { AuthService } from '@auth/auth.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { Role, Status } from '@prisma/client';
 import { BcryptService, PrismaService } from '@services';
 import { LoginUserDto, RegisterDoctorDto, RegisterPatientDto } from './dto';
 @Injectable()
@@ -59,7 +59,6 @@ export class LoginUserService {
       // Generate password
       // const randomPassword = randomize('Aa0', 8);
       const hash = await this.bcryptService.hash(dto.password);
-      delete dto.password;
 
       // Check for user exists
       const userExist = await this.prismaService.user.findFirst({
@@ -82,6 +81,7 @@ export class LoginUserService {
       if (dto?.password.length < 6) {
         throw new BadRequestException(t(MESS_CODE['PASSWORD_INVALID']));
       }
+      delete dto.password;
 
       const data = await this.prismaService.$transaction(async (prisma) => {
         // Check for role exists
@@ -164,6 +164,7 @@ export class LoginUserService {
         await prisma.healthRecord.create({
           data: {
             patientId: patient.id,
+            status: Status.SAFE,
             createdBy: patient.id,
           },
         });

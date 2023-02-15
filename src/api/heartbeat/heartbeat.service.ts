@@ -28,10 +28,7 @@ export class HeartbeatService {
       };
 
       if (dto?.search) {
-        where.OR = [
-          { id: { contains: dto?.search.trim() } },
-          { healthRecordId: { contains: dto?.search.trim() } },
-        ];
+        where.OR = [{ id: { contains: dto?.search.trim() } }, { healthRecordId: { contains: dto?.search.trim() } }];
       }
       const ids = convertFilterStringToArray(dto.ids);
       if (ids && ids.length > 0) {
@@ -53,10 +50,6 @@ export class HeartbeatService {
         this.prismaService.heartbeat.count({ where }),
         this.prismaService.heartbeat.findMany({
           where,
-          select: {
-            id: true,
-            // type
-          },
           orderBy: {
             createdAt: 'desc',
           },
@@ -75,8 +68,7 @@ export class HeartbeatService {
   async findOne(id: string) {
     try {
       const exist = await this.checkBloodPressureExist({ id });
-      if (!exist)
-        throw new BadRequestException(t(MESS_CODE['HEARTBEAT_NOT_FOUND'], {}));
+      if (!exist) throw new BadRequestException(t(MESS_CODE['HEARTBEAT_NOT_FOUND'], {}));
 
       const data = await this.prismaService.heartbeat.findFirst({
         where: {
@@ -126,7 +118,6 @@ export class HeartbeatService {
       if (Number(heartRateIndicator) < 0) {
         throw new BadRequestException(t(MESS_CODE['INVALID_HEART_RATE_INDICATOR']));
       }
-      
 
       const data = await this.prismaService.heartbeat.create({
         data: {
@@ -143,12 +134,11 @@ export class HeartbeatService {
     try {
       const { heartRateIndicator } = dto;
       const exist = await this.checkBloodPressureExist({ id });
-      if (!exist)
-        throw new BadRequestException(t(MESS_CODE['HEARTBEAT_NOT_FOUND'], {}));
+      if (!exist) throw new BadRequestException(t(MESS_CODE['HEARTBEAT_NOT_FOUND'], {}));
 
-        if (Number(heartRateIndicator) < 0) {
-          throw new BadRequestException(t(MESS_CODE['INVALID_HEART_RATE_INDICATOR']));
-        }
+      if (Number(heartRateIndicator) < 0) {
+        throw new BadRequestException(t(MESS_CODE['INVALID_HEART_RATE_INDICATOR']));
+      }
 
       const data = await this.prismaService.heartbeat.update({
         where: { id },
@@ -165,8 +155,7 @@ export class HeartbeatService {
   async delete(memberId: string, id: string) {
     try {
       const exist = await this.checkBloodPressureExist({ id });
-      if (!exist)
-        throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
+      if (!exist) throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
       const data = await this.prismaService.heartbeat.update({
         where: { id },
         data: {

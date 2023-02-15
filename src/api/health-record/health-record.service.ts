@@ -296,15 +296,13 @@ export class HealthRecordService {
         select: {
           height: true,
           weight: true,
+          indexBmi: true,
         },
       });
 
-      if (bmi.height) {
-        data['height'] = bmi.height;
-      }
-      if (bmi.weight) {
-        data['weight'] = bmi.weight;
-      }
+      data['height'] = bmi?.height ?? '';
+      data['weight'] = bmi?.weight ?? '';
+      data['indexBmi'] = bmi?.indexBmi ?? '';
 
       const heartbeat = await this.prismaService.heartbeat.findFirst({
         where: {
@@ -319,9 +317,7 @@ export class HealthRecordService {
         },
       });
 
-      if (heartbeat.heartRateIndicator) {
-        data['heartbeat'] = heartbeat.heartRateIndicator;
-      }
+      data['heartbeat'] = heartbeat?.heartRateIndicator ?? '';
 
       const bloodPressure = await this.prismaService.bloodPressure.findFirst({
         where: {
@@ -336,12 +332,8 @@ export class HealthRecordService {
           diastolic: true,
         },
       });
-      if (bloodPressure.systolic) {
-        data['systolic'] = bloodPressure.systolic;
-      }
-      if (bloodPressure.diastolic) {
-        data['diastolic'] = bloodPressure.diastolic;
-      }
+      data['systolic'] = bloodPressure?.systolic ?? '';
+      data['diastolic'] = bloodPressure?.diastolic ?? '';
 
       const glucose = await this.prismaService.glucose.findFirst({
         where: {
@@ -356,9 +348,7 @@ export class HealthRecordService {
         },
       });
 
-      if (glucose.glucose) {
-        data['glucose'] = glucose.glucose;
-      }
+      data['glucose'] = glucose?.glucose ?? '';
 
       const cholesterol = await this.prismaService.cholesterol.findFirst({
         where: {
@@ -373,9 +363,7 @@ export class HealthRecordService {
         },
       });
 
-      if (cholesterol.cholesterol) {
-        data['cholesterol'] = cholesterol.cholesterol;
-      }
+      data['cholesterol'] = cholesterol?.cholesterol ?? '';
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {

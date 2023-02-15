@@ -2,12 +2,7 @@
 import { ResponseSuccess } from '@/types';
 import { convertFilterStringToArray, MESS_CODE, t } from '@/utils';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import {
-  Prisma,
-  Status,
-  TypeConversation,
-  TypeNotification,
-} from '@prisma/client';
+import { Prisma, TypeConversation, TypeNotification } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination } from '@types';
 import { cleanup } from '@utils';
@@ -83,8 +78,7 @@ export class PatientService {
       const exist = await this.prismaService.patient.findFirst({
         where: { id },
       });
-      if (!exist)
-        throw new BadRequestException(t(MESS_CODE['PATIENT_NOT_FOUND']));
+      if (!exist) throw new BadRequestException(t(MESS_CODE['PATIENT_NOT_FOUND']));
 
       const data = await this.prismaService.patient.findFirst({
         where: { id },
@@ -101,8 +95,7 @@ export class PatientService {
       const exist = await this.prismaService.patient.findFirst({
         where: { id },
       });
-      if (!exist)
-        throw new BadRequestException(t(MESS_CODE['PATIENT_NOT_FOUND']));
+      if (!exist) throw new BadRequestException(t(MESS_CODE['PATIENT_NOT_FOUND']));
 
       const data = await this.prismaService.patient.update({
         where: { id },
@@ -124,8 +117,7 @@ export class PatientService {
       const exist = await this.prismaService.doctor.findFirst({
         where: { id: dto.doctorId },
       });
-      if (!exist)
-        throw new BadRequestException(t(MESS_CODE['DOCTOR_NOT_FOUND']));
+      if (!exist) throw new BadRequestException(t(MESS_CODE['DOCTOR_NOT_FOUND']));
 
       const data = await this.prismaService.$transaction(async (prisma) => {
         await prisma.patient.update({
@@ -146,16 +138,8 @@ export class PatientService {
           data: {
             avatar: null,
             typeConversation: TypeConversation.SINGLE,
-            member: arr.length
-              ? { connect: arr.map((v) => ({ memberId: v })) }
-              : undefined,
-          },
-        });
-
-        await prisma.healthRecord.create({
-          data: {
-            patientId: memberId,
-            status: Status.SAFE,
+            leaderId: dto.doctorId,
+            member: arr.length ? { connect: arr.map((v) => ({ memberId: v })) } : undefined,
           },
         });
 
@@ -170,25 +154,66 @@ export class PatientService {
         });
 
         // await this.prismaService
-        return data;
+        return patient;
       });
-
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
-      console.log(err);
+      console.log(err.message);
 
       throw new BadRequestException(err.message);
     }
   }
 
-  async revokeDoctor(memberId: string) {
+  async revokeDoctor(id: string) {
     try {
+      const user = await this.prismaService.user.findFirst({
+        where: { id },
+      });
+      const patient = await this.prismaService.patient.findFirst({
+        where: { id: user.memberId },
+      });
       const data = await this.prismaService.patient.update({
-        where: { id: memberId },
+        where: { id: patient.id },
         data: {
-          doctorId: undefined,
+          doctorId: null,
         },
       });
+
+      // console.log(memberId);
+
+      const conversation = await this.prismaService.conversation.findMany({
+        where: {
+          member: { some: { id: { in: id } } },
+          leaderId: patient.doctorId,
+          isDeleted: false,
+        },
+      });
+      console.log(conversation);
+
+      await Promise.all(
+        conversation.map(async (i) => {
+          if (i.typeConversation === TypeConversation.SINGLE) {
+            await this.prismaService.conversation.update({
+              where: {
+                id: i.id,
+              },
+              data: {
+                isDeleted: true,
+                deletedBy: patient.id,
+              },
+            });
+          } else {
+            await this.prismaService.conversation.update({
+              where: {
+                id: i.id,
+              },
+              data: {
+                member: { disconnect: { id: id } },
+              },
+            });
+          }
+        }),
+      );
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {

@@ -1,18 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { JwtAuthGuard } from '@auth/guards';
 import { CurrentUser, Paginate } from '@decorators';
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Patch,
-  Put,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { FilterPatientsDto, SelectDoctorDto, UpdatePatientDto } from './dto';
@@ -43,15 +32,15 @@ export class PatientController {
     return this.patientService.update(id, dto);
   }
 
-  @Put('patient/select/:id')
+  @Put('patient/select')
   @HttpCode(HttpStatus.OK)
-  selectDoctor(@Param('id') id: string, @Body() dto: SelectDoctorDto) {
-    return this.patientService.selectDoctor(id, dto);
+  selectDoctor(@CurrentUser() user, @Body() dto: SelectDoctorDto) {
+    return this.patientService.selectDoctor(user['memberId'], dto);
   }
 
-  @Put('patient/revoke/:id')
+  @Put('patient/revoke')
   @HttpCode(HttpStatus.OK)
-  revokeDoctor(@Param('id') id: string) {
-    return this.patientService.revokeDoctor(id);
+  revokeDoctor(@CurrentUser() user) {
+    return this.patientService.revokeDoctor(user['id']);
   }
 }

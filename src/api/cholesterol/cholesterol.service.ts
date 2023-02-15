@@ -50,10 +50,6 @@ export class CholesterolService {
         this.prismaService.cholesterol.count({ where }),
         this.prismaService.cholesterol.findMany({
           where,
-          select: {
-            id: true,
-            // type
-          },
           orderBy: {
             createdAt: 'desc',
           },

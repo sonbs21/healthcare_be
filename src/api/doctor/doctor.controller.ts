@@ -19,7 +19,12 @@ export class DoctorController {
   findAll(@Query() dto: FilterDoctorsDto, @Paginate() pagination: Pagination) {
     return this.doctorService.findAll(dto, pagination);
   }
-
+  @Get('doctor/patients')
+  @HttpCode(HttpStatus.OK)
+  getAllPatient(@CurrentUser() user, @Query() dto: FilterPatientsWithDoctorIdDto, @Paginate() pagination: Pagination) {
+    console.log(user);
+    return this.doctorService.getAllPatient(user['memberId'], dto, pagination);
+  }
   @Get('doctor/:id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {
@@ -30,11 +35,5 @@ export class DoctorController {
   @HttpCode(HttpStatus.OK)
   update(@Param('id') id: string, @Body() dto: UpdateDoctorDto) {
     return this.doctorService.update(id, dto);
-  }
-
-  @Get('doctor/patients')
-  @HttpCode(HttpStatus.OK)
-  getAllPatient(@CurrentUser() user, @Query() dto: FilterPatientsWithDoctorIdDto, @Paginate() pagination: Pagination) {
-    return this.doctorService.getAllPatient(user['memberId'], dto, pagination);
   }
 }

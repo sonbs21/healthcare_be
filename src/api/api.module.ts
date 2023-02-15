@@ -2,8 +2,10 @@
 import { LoginUserModule } from '@api/login/login.module';
 import { UsersModule } from '@api/users/users.module';
 import { Module } from '@nestjs/common';
+import { AppointmentModule } from './appointment/appointment.module';
 import { BloodPressureModule } from './blood-pressure/blood-pressure.module';
 import { BmiModule } from './bmi/bmi.module';
+import { CarerModule } from './carer/carer.module';
 import { CholesterolModule } from './cholesterol/cholesterol.module';
 import { ConversationModule } from './conversation/conversation.module';
 import { DoctorModule } from './doctor/doctor.module';
@@ -24,7 +26,9 @@ import { PatientModule } from './patient/patient.module';
     HeartbeatModule,
     BloodPressureModule,
     GlucoseModule,
-    CholesterolModule
+    CholesterolModule,
+    CarerModule,
+    AppointmentModule,
   ],
   providers: [],
   exports: [],

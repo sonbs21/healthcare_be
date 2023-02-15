@@ -50,10 +50,6 @@ export class BloodPressureService {
         this.prismaService.bloodPressure.count({ where }),
         this.prismaService.bloodPressure.findMany({
           where,
-          select: {
-            id: true,
-            // type
-          },
           orderBy: {
             createdAt: 'desc',
           },

@@ -19,5 +19,6 @@ export const doctorsSelect: Prisma.DoctorSelect = {
       phone: true,
     },
   },
+  patient: true,
   createdAt: true,
 };
