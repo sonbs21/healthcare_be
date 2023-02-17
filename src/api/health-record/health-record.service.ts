@@ -297,12 +297,14 @@ export class HealthRecordService {
           height: true,
           weight: true,
           indexBmi: true,
+          createdAt:true
         },
       });
 
       data['height'] = bmi?.height ?? '';
       data['weight'] = bmi?.weight ?? '';
       data['indexBmi'] = bmi?.indexBmi ?? '';
+      data['createdAt'] = bmi?.createdAt ?? '';
 
       const heartbeat = await this.prismaService.heartbeat.findFirst({
         where: {

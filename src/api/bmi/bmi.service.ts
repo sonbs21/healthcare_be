@@ -52,10 +52,11 @@ export class BmiService {
           where,
           select: {
             id: true,
-            healthRecordId:true,
+            healthRecordId: true,
             height: true,
             weight: true,
             indexBmi: true,
+            createdAt: true,
             // type
           },
           orderBy: {
