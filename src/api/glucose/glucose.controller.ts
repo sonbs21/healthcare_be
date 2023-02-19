@@ -16,7 +16,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
-import { CreateGlucoseDto, UpdateGlucoseDto } from './dto';
+import { CreateGlucoseDto, FilterGlucoseDto, FilterGlucoseGetMemberDto, UpdateGlucoseDto } from './dto';
 import { GlucoseService } from './glucose.service';
 
 @Controller('v1')
@@ -28,7 +28,7 @@ export class GlucoseController {
 
   @Get('glucoses')
   @HttpCode(HttpStatus.OK)
-  findAll(@Query() dto: any, @Paginate() pagination: Pagination) {
+  findAll(@Query() dto: FilterGlucoseDto, @Paginate() pagination: Pagination) {
     return this.glucoseService.findAll(dto, pagination);
   }
 
@@ -40,29 +40,25 @@ export class GlucoseController {
 
   @Get('get-glucose')
   @HttpCode(HttpStatus.OK)
-  getGlucose(@CurrentUser() user, @Paginate() pagination: Pagination) {
-    return this.glucoseService.getGlucose(user['memberID'], pagination);
+  getGlucose(@CurrentUser() user, @Query() dto: FilterGlucoseGetMemberDto, @Paginate() pagination: Pagination) {
+    return this.glucoseService.getGlucose(user['memberID'], dto, pagination);
   }
 
   @Post('glucose')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateGlucoseDto) {
-    return this.glucoseService.create(user['memberID'],dto);
+    return this.glucoseService.create(user['memberID'], dto);
   }
 
   @Patch('glucose/:id')
   @HttpCode(HttpStatus.OK)
-  update(
-    @CurrentUser() user,
-    @Param('id') id: string,
-    @Body() dto: UpdateGlucoseDto,
-  ) {
-    return this.glucoseService.update(user['memberId'],id,dto);
+  update(@CurrentUser() user, @Param('id') id: string, @Body() dto: UpdateGlucoseDto) {
+    return this.glucoseService.update(user['memberId'], id, dto);
   }
 
   @Delete('glucose/:id')
   @HttpCode(HttpStatus.OK)
   remove(@CurrentUser() user, @Param('id') id: string) {
-    return this.glucoseService.delete(user['memberId'],id);
+    return this.glucoseService.delete(user['memberId'], id);
   }
 }

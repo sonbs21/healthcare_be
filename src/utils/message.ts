@@ -7,6 +7,7 @@ export const MESS_CODE = {
   PASSWORD_INVALID: 'Mật khẩu phải nhiều hơn 6 ký tự',
   PATIENT_NOT_FOUND:"Bệnh nhân không tồn tại",
   DOCTOR_NOT_FOUND:"Bác sĩ không tồn tại",
+  APPOINTMENT_NOT_FOUND:"Cuộc hẹn không tồn tại",
   BMI_NOT_FOUND:"Mã số bmi không tồn tại",
   HEALTH_RECORD_NOT_FOUND:"Báo cáo sức khỏe không tồn tại",
   INVALID_HEIGHT:"Chiều cao là số và phải lớn hơn 0",
@@ -17,6 +18,7 @@ export const MESS_CODE = {
   INVALID_CHOLESTEROL:"Chỉ số cholesterol là số và phải lớn hơn 0",
   INVALID_GLUCOSE:"Chỉ số glucose là số và phải lớn hơn 0",
   INVALID_HEARTBEAT:"Chỉ số nhịp tim là số và phải lớn hơn 0",
+  NOT_PERMISSION:"Bạn không có quyền thực hiện công việc này",
 };
 
 const TranslationCode = (mess: string, options?: object) => {

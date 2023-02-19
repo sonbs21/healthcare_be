@@ -1,11 +1,11 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma, StatusAppointment } from '@prisma/client';
+import { Prisma, StatusAppointment, TypeNotification } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
 import { cleanup, convertFilterStringToArray, MESS_CODE, t } from '@utils';
 import moment from 'moment';
-import { CreateAppointmentDto, FilterAppointmentDto, UpdateAppointmentDto } from './dto';
+import { CreateAppointmentDto, FilterAppointmentDto, ReasonAppointmentDto, UpdateAppointmentDto } from './dto';
 
 @Injectable()
 export class AppointmentService {
@@ -183,6 +183,16 @@ export class AppointmentService {
           id: memberId,
         },
       });
+
+      await this.prismaService.notification.create({
+        data: {
+          title: 'Đặt lịch hẹn',
+          content: `Bệnh nhân ${patient.fullName} đã đặt lịch hẹn với bạn`,
+          typeNotification: TypeNotification.APPOINTMENT,
+          isRead: false,
+          userId: patient.doctorId,
+        },
+      });
       const data = await this.prismaService.appointment.create({
         data: {
           fullName: dto.fullName,
@@ -203,6 +213,16 @@ export class AppointmentService {
 
   async approve(memberId: string, id: string) {
     try {
+      const doctor = await this.prismaService.doctor.findFirst({
+        where: {
+          id: memberId,
+        },
+      });
+
+      if (!doctor) {
+        throw new BadRequestException(t(MESS_CODE['NOT_PERMISSION'], {}));
+      }
+
       const appointment = await this.prismaService.appointment.findFirst({
         where: {
           id: id,
@@ -210,8 +230,18 @@ export class AppointmentService {
       });
 
       if (!appointment) {
-        throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
+        throw new BadRequestException(t(MESS_CODE['APPOINTMENT_NOT_FOUND'], {}));
       }
+
+      await this.prismaService.notification.create({
+        data: {
+          title: 'Đặt lịch hẹn thành công',
+          content: `Bác sĩ ${doctor.fullName} đã đồng ý với lịch hẹn của bạn`,
+          typeNotification: TypeNotification.APPOINTMENT,
+          isRead: false,
+          userId: appointment.patientId,
+        },
+      });
 
       const data = await this.prismaService.appointment.update({
         where: {
@@ -226,8 +256,17 @@ export class AppointmentService {
     } catch (error) {}
   }
 
-  async refuse(memberId: string, id: string) {
+  async refuse(memberId: string, id: string, dto: ReasonAppointmentDto) {
     try {
+      const doctor = await this.prismaService.doctor.findFirst({
+        where: {
+          id: memberId,
+        },
+      });
+
+      if (!doctor) {
+        throw new BadRequestException(t(MESS_CODE['NOT_PERMISSION'], {}));
+      }
       const appointment = await this.prismaService.appointment.findFirst({
         where: {
           id: id,
@@ -238,12 +277,23 @@ export class AppointmentService {
         throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
       }
 
+      await this.prismaService.notification.create({
+        data: {
+          title: 'Đặt lịch hẹn thất bại',
+          content: `Bác sĩ ${doctor.fullName} đã từ chối với lịch hẹn của bạn với lý do: ${dto.reason}`,
+          typeNotification: TypeNotification.APPOINTMENT,
+          isRead: false,
+          userId: appointment.patientId,
+        },
+      });
+
       const data = await this.prismaService.appointment.update({
         where: {
           id,
         },
         data: {
           statusAppointment: StatusAppointment.REFUSED,
+          reason: dto.reason,
           updatedBy: memberId,
         },
       });
@@ -251,8 +301,20 @@ export class AppointmentService {
     } catch (error) {}
   }
 
-  async cancel(memberId: string, id: string) {
+  async cancel(memberId: string, id: string, dto: ReasonAppointmentDto) {
     try {
+      const patient = await this.prismaService.patient.findFirst({
+        where: {
+          id: memberId,
+        },
+      });
+
+      const doctor = await this.prismaService.patient.findFirst({
+        where: {
+          id: memberId,
+        },
+      });
+
       const appointment = await this.prismaService.appointment.findFirst({
         where: {
           id: id,
@@ -261,6 +323,30 @@ export class AppointmentService {
 
       if (!appointment) {
         throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
+      }
+
+      if (patient) {
+        await this.prismaService.notification.create({
+          data: {
+            title: 'Hủy lịch hẹn',
+            content: `Bệnh nhân ${patient.fullName} đã hủy lịch hẹn với lý do: ${dto.reason}`,
+            typeNotification: TypeNotification.APPOINTMENT,
+            isRead: false,
+            userId: patient.doctorId,
+          },
+        });
+      }
+
+      if (doctor) {
+        await this.prismaService.notification.create({
+          data: {
+            title: 'Hủy lịch hẹn',
+            content: `Bác sĩ ${doctor.fullName} đã hủy lịch hẹn với lý do: ${dto.reason}`,
+            typeNotification: TypeNotification.APPOINTMENT,
+            isRead: false,
+            userId: appointment.doctorId,
+          },
+        });
       }
 
       const data = await this.prismaService.appointment.update({
@@ -269,6 +355,7 @@ export class AppointmentService {
         },
         data: {
           statusAppointment: StatusAppointment.CANCELED,
+          reason: dto.reason,
           updatedBy: memberId,
         },
       });

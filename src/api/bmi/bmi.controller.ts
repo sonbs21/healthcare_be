@@ -18,7 +18,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { BmiService } from './bmi.service';
-import {  CreateBmiDto, UpdateBmiDto } from './dto';
+import { CreateBmiDto, FilterBmiDto, FilterBmiGetMemberDto, UpdateBmiDto } from './dto';
 
 @Controller('v1')
 @ApiTags('Bmi')
@@ -29,7 +29,7 @@ export class BmiController {
 
   @Get('bmis')
   @HttpCode(HttpStatus.OK)
-  findAll(@Query() dto: any, @Paginate() pagination: Pagination) {
+  findAll(@Query() dto: FilterBmiDto, @Paginate() pagination: Pagination) {
     return this.bmiService.findAll(dto, pagination);
   }
 
@@ -41,29 +41,25 @@ export class BmiController {
 
   @Get('get-bmi')
   @HttpCode(HttpStatus.OK)
-  getBmi(@CurrentUser() user, @Paginate() pagination: Pagination) {
-    return this.bmiService.getBmi(user['memberID'], pagination);
+  getBmi(@CurrentUser() user, @Query() dto: FilterBmiGetMemberDto, @Paginate() pagination: Pagination) {
+    return this.bmiService.getBmi(user['memberID'], dto, pagination);
   }
 
   @Post('bmi')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateBmiDto) {
-    return this.bmiService.create(user['memberID'],dto);
+    return this.bmiService.create(user['memberID'], dto);
   }
 
   @Patch('bmi/:id')
   @HttpCode(HttpStatus.OK)
-  update(
-    @CurrentUser() user,
-    @Param('id') id: string,
-    @Body() dto: UpdateBmiDto,
-  ) {
-    return this.bmiService.update(user['memberId'],id,dto);
+  update(@CurrentUser() user, @Param('id') id: string, @Body() dto: UpdateBmiDto) {
+    return this.bmiService.update(user['memberId'], id, dto);
   }
 
   @Delete('bmi/:id')
   @HttpCode(HttpStatus.OK)
   remove(@CurrentUser() user, @Param('id') id: string, @Headers() header) {
-    return this.bmiService.delete(user['memberId'],id);
+    return this.bmiService.delete(user['memberId'], id);
   }
 }

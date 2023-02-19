@@ -17,7 +17,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { CholesterolService } from './cholesterol.service';
-import { CreateCholesterolDto, UpdateCholesterolDto } from './dto';
+import { CreateCholesterolDto, FilterCholesterolDto, FilterCholesterolGetMemberDto, UpdateCholesterolDto } from './dto';
 
 @Controller('v1')
 @ApiTags('Cholesterol')
@@ -28,7 +28,7 @@ export class CholesterolController {
 
   @Get('cholesterols')
   @HttpCode(HttpStatus.OK)
-  findAll(@Query() dto: any, @Paginate() pagination: Pagination) {
+  findAll(@Query() dto: FilterCholesterolDto, @Paginate() pagination: Pagination) {
     return this.cholesterolService.findAll(dto, pagination);
   }
 
@@ -40,29 +40,25 @@ export class CholesterolController {
 
   @Get('get-cholesterol')
   @HttpCode(HttpStatus.OK)
-  getCholesterol(@CurrentUser() user, @Paginate() pagination: Pagination) {
-    return this.cholesterolService.getCholesterol(user['memberID'], pagination);
+  getCholesterol(@CurrentUser() user, @Query() dto: FilterCholesterolGetMemberDto, @Paginate() pagination: Pagination) {
+    return this.cholesterolService.getCholesterol(user['memberID'], dto, pagination);
   }
 
   @Post('cholesterol')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateCholesterolDto) {
-    return this.cholesterolService.create(user['memberID'],dto);
+    return this.cholesterolService.create(user['memberID'], dto);
   }
 
   @Patch('cholesterol/:id')
   @HttpCode(HttpStatus.OK)
-  update(
-    @CurrentUser() user,
-    @Param('id') id: string,
-    @Body() dto: UpdateCholesterolDto,
-  ) {
-    return this.cholesterolService.update(user['memberId'],id,dto);
+  update(@CurrentUser() user, @Param('id') id: string, @Body() dto: UpdateCholesterolDto) {
+    return this.cholesterolService.update(user['memberId'], id, dto);
   }
 
   @Delete('cholesterol/:id')
   @HttpCode(HttpStatus.OK)
   remove(@CurrentUser() user, @Param('id') id: string) {
-    return this.cholesterolService.delete(user['memberId'],id);
+    return this.cholesterolService.delete(user['memberId'], id);
   }
 }

@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
 import { cleanup, convertFilterStringToArray, MESS_CODE, t } from '@utils';
-import { CreateCholesterolDto, FilterCholesterolDto, UpdateCholesterolDto } from './dto';
+import { CreateCholesterolDto, FilterCholesterolDto, FilterCholesterolGetMemberDto, UpdateCholesterolDto } from './dto';
 
 @Injectable()
 export class CholesterolService {
@@ -53,6 +53,13 @@ export class CholesterolService {
           orderBy: {
             createdAt: 'desc',
           },
+          select: {
+            id: true,
+            healthRecordId: true,
+            cholesterol: true,
+            createdAt: true,
+            createdBy: true,
+          },
           skip: !dto?.isAll ? skip : undefined,
           take: !dto?.isAll ? take : undefined,
         }),
@@ -75,6 +82,13 @@ export class CholesterolService {
           id,
           isDeleted: false,
         },
+        select: {
+          id: true,
+          healthRecordId: true,
+          cholesterol: true,
+          createdAt: true,
+          createdBy: true,
+        },
       });
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
@@ -82,7 +96,7 @@ export class CholesterolService {
     }
   }
 
-  async getCholesterol(memberId: string, pagination: Pagination) {
+  async getCholesterol(memberId: string, dto: FilterCholesterolGetMemberDto, pagination: Pagination) {
     try {
       const { skip, take } = pagination;
 
@@ -98,13 +112,20 @@ export class CholesterolService {
           orderBy: {
             createdAt: 'desc',
           },
-          skip: skip,
-          take: take,
+          select: {
+            id: true,
+            healthRecordId: true,
+            cholesterol: true,
+            createdAt: true,
+            createdBy: true,
+          },
+          skip: !dto?.isAll ? skip : undefined,
+          take: !dto?.isAll ? take : undefined,
         }),
       ]);
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
-        pagination: pagination,
+        pagination: !dto?.isAll ? pagination : undefined,
         total,
       });
     } catch (err) {

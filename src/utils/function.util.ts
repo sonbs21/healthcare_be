@@ -6,7 +6,9 @@ export const numberToColumn = (n) => {
 };
 
 export const funcIndexBmi = (height, weight) => {
-  const indexBmi = (weight / (height * height));
+  const tmp = Number(height) / 100;
+  console.log('tmp', tmp);
+  const indexBmi = Number(weight) / (tmp * tmp);
 
   return indexBmi;
 };

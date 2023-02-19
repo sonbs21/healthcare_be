@@ -18,7 +18,12 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { BloodPressureService } from './blood-pressure.service';
-import { CreateBloodPressureDto, UpdateBloodPressureDto } from './dto';
+import {
+  CreateBloodPressureDto,
+  FilterBloodPressureDto,
+  FilterBloodPressureGetMemberDto,
+  UpdateBloodPressureDto,
+} from './dto';
 
 @Controller('v1')
 @ApiTags('Blood Pressure')
@@ -29,7 +34,7 @@ export class BloodPressureController {
 
   @Get('blood-pressures')
   @HttpCode(HttpStatus.OK)
-  findAll(@Query() dto: any, @Paginate() pagination: Pagination) {
+  findAll(@Query() dto: FilterBloodPressureDto, @Paginate() pagination: Pagination) {
     return this.bloodPressureService.findAll(dto, pagination);
   }
 
@@ -41,8 +46,12 @@ export class BloodPressureController {
 
   @Get('get-blood-pressure')
   @HttpCode(HttpStatus.OK)
-  getBloodPressure(@CurrentUser() user, @Paginate() pagination: Pagination) {
-    return this.bloodPressureService.getBloodPressure(user['memberID'], pagination);
+  getBloodPressure(
+    @CurrentUser() user,
+    @Query() dto: FilterBloodPressureGetMemberDto,
+    @Paginate() pagination: Pagination,
+  ) {
+    return this.bloodPressureService.getBloodPressure(user['memberID'], dto, pagination);
   }
 
   @Post('blood-pressure')

@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
 import { cleanup, convertFilterStringToArray, funcIndexBmi, MESS_CODE, t } from '@utils';
-import { CreateBmiDto, FilterBmiDto, UpdateBmiDto } from './dto';
+import { CreateBmiDto, FilterBmiDto, FilterBmiGetMemberDto, UpdateBmiDto } from './dto';
 
 @Injectable()
 export class BmiService {
@@ -57,7 +57,7 @@ export class BmiService {
             weight: true,
             indexBmi: true,
             createdAt: true,
-            // type
+            createdBy: true,
           },
           orderBy: {
             createdAt: 'desc',
@@ -84,6 +84,15 @@ export class BmiService {
           id,
           isDeleted: false,
         },
+        select: {
+          id: true,
+          healthRecordId: true,
+          height: true,
+          weight: true,
+          indexBmi: true,
+          createdAt: true,
+          createdBy: true,
+        },
       });
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
@@ -91,7 +100,7 @@ export class BmiService {
     }
   }
 
-  async getBmi(memberId: string, pagination: Pagination) {
+  async getBmi(memberId: string, dto: FilterBmiGetMemberDto, pagination: Pagination) {
     try {
       const { skip, take } = pagination;
 
@@ -107,13 +116,22 @@ export class BmiService {
           orderBy: {
             createdAt: 'desc',
           },
-          skip: skip,
-          take: take,
+          select: {
+            id: true,
+            healthRecordId: true,
+            height: true,
+            weight: true,
+            indexBmi: true,
+            createdAt: true,
+            createdBy: true,
+          },
+          skip: !dto?.isAll ? skip : undefined,
+          take: !dto?.isAll ? take : undefined,
         }),
       ]);
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
-        pagination: pagination,
+        pagination: !dto?.isAll ? pagination : undefined,
         total,
       });
     } catch (err) {

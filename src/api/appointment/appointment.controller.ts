@@ -12,13 +12,14 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { AppointmentService } from './appointment.service';
-import { CreateAppointmentDto, FilterAppointmentDto, UpdateAppointmentDto } from './dto';
+import { CreateAppointmentDto, FilterAppointmentDto, ReasonAppointmentDto, UpdateAppointmentDto } from './dto';
 
 @Controller('v1')
 @ApiTags('Appointment')
@@ -52,7 +53,7 @@ export class AppointmentController {
   @Post('appointment')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateAppointmentDto) {
-    return this.appointmentService.create(user['memberID'], dto);
+    return this.appointmentService.create(user['memberId'], dto);
   }
 
   @Patch('appointment/:id')
@@ -65,5 +66,23 @@ export class AppointmentController {
   @HttpCode(HttpStatus.OK)
   remove(@CurrentUser() user, @Param('id') id: string) {
     return this.appointmentService.delete(user['memberId'], id);
+  }
+
+  @Put('appointment/:id/approve')
+  @HttpCode(HttpStatus.OK)
+  approve(@CurrentUser() user, @Param('id') id: string) {
+    return this.appointmentService.approve(user['memberId'], id);
+  }
+
+  @Put('appointment/:id/refuse')
+  @HttpCode(HttpStatus.OK)
+  refuse(@CurrentUser() user, @Param('id') id: string, @Body() dto: ReasonAppointmentDto) {
+    return this.appointmentService.refuse(user['memberId'], id, dto);
+  }
+
+  @Put('appointment/:id/cancel')
+  @HttpCode(HttpStatus.OK)
+  cancel(@CurrentUser() user, @Param('id') id: string, @Body() dto: ReasonAppointmentDto) {
+    return this.appointmentService.cancel(user['memberId'], id, dto);
   }
 }

@@ -1,8 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsNotEmpty, IsString, MaxDate } from 'class-validator';
+import { IsDate, IsNotEmpty, IsString } from 'class-validator';
 import * as moment from 'moment';
-
 
 export class CreateAppointmentDto {
   @IsString()
@@ -17,13 +16,11 @@ export class CreateAppointmentDto {
 
   @IsDate()
   @IsNotEmpty()
-  @MaxDate(moment().subtract(1, 'days').utcOffset(7, true).toDate())
   @ApiProperty({ example: moment().utcOffset(7, true).toDate() })
   dateOfBirth?: Date;
 
   @IsDate()
   @IsNotEmpty()
-  @MaxDate(moment().subtract(1, 'days').utcOffset(7, true).toDate())
   @ApiProperty({ example: moment().utcOffset(7, true).toDate() })
   dateMeeting?: Date;
 
@@ -36,4 +33,11 @@ export class CreateAppointmentDto {
   @IsNotEmpty()
   @ApiProperty({ example: '' })
   timeMeeting?: string;
+}
+
+export class ReasonAppointmentDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ example: '' })
+  reason?: string;
 }

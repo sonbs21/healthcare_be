@@ -12,15 +12,16 @@ export const ResponseSuccess = (
     other?: any;
   } = {},
 ) => {
+  console.log('ss', options);
   const { statusCode, pagination = {}, total = 0, other } = options;
   let paginate = undefined;
   if (Object.keys(pagination).length) {
     paginate = convertPagination(pagination, total);
-    // delete pagination.skip;
-    // delete pagination.take;
-    // const totalPage = total / pagination.pageSize;
-    // const lastPage = Math.floor(totalPage) < totalPage ? Math.floor(totalPage) + 1 : Math.floor(totalPage);
-    // if (pagination) paginate = { ...pagination, total, lastPage };
+    delete pagination.skip;
+    delete pagination.take;
+    const totalPage = total / pagination.pageSize;
+    const lastPage = Math.floor(totalPage) < totalPage ? Math.floor(totalPage) + 1 : Math.floor(totalPage);
+    if (pagination) paginate = { ...pagination, total, lastPage };
   }
   const message = t(code);
   return {
@@ -39,10 +40,7 @@ export const convertPagination = (pagination: Pagination, total: number) => {
     delete pagination.skip;
     delete pagination.take;
     const totalPage = total / pagination.pageSize;
-    const lastPage =
-      Math.floor(totalPage) < totalPage
-        ? Math.floor(totalPage) + 1
-        : Math.floor(totalPage);
+    const lastPage = Math.floor(totalPage) < totalPage ? Math.floor(totalPage) + 1 : Math.floor(totalPage);
     if (pagination)
       paginate = {
         ...pagination,

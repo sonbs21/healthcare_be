@@ -4,7 +4,12 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
 import { cleanup, convertFilterStringToArray, MESS_CODE, t } from '@utils';
-import { CreateBloodPressureDto, FilterBloodPressureDto, UpdateBloodPressureDto } from './dto';
+import {
+  CreateBloodPressureDto,
+  FilterBloodPressureDto,
+  FilterBloodPressureGetMemberDto,
+  UpdateBloodPressureDto,
+} from './dto';
 
 @Injectable()
 export class BloodPressureService {
@@ -53,6 +58,14 @@ export class BloodPressureService {
           orderBy: {
             createdAt: 'desc',
           },
+          select: {
+            id: true,
+            healthRecordId: true,
+            systolic: true,
+            diastolic: true,
+            createdAt: true,
+            createdBy: true,
+          },
           skip: !dto?.isAll ? skip : undefined,
           take: !dto?.isAll ? take : undefined,
         }),
@@ -75,6 +88,14 @@ export class BloodPressureService {
           id,
           isDeleted: false,
         },
+        select: {
+          id: true,
+          healthRecordId: true,
+          systolic: true,
+          diastolic: true,
+          createdAt: true,
+          createdBy: true,
+        }
       });
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
@@ -82,7 +103,7 @@ export class BloodPressureService {
     }
   }
 
-  async getBloodPressure(memberId: string, pagination: Pagination) {
+  async getBloodPressure(memberId: string, dto: FilterBloodPressureGetMemberDto, pagination: Pagination) {
     try {
       const { skip, take } = pagination;
 
@@ -98,13 +119,21 @@ export class BloodPressureService {
           orderBy: {
             createdAt: 'desc',
           },
-          skip: skip,
-          take: take,
+          select: {
+            id: true,
+            healthRecordId: true,
+            systolic: true,
+            diastolic: true,
+            createdAt: true,
+            createdBy: true,
+          },
+          skip: !dto?.isAll ? skip : undefined,
+          take: !dto?.isAll ? take : undefined,
         }),
       ]);
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
-        pagination: pagination,
+        pagination: !dto?.isAll ? pagination : undefined,
         total,
       });
     } catch (err) {

@@ -63,6 +63,11 @@ export class HealthRecordService {
           take: !dto?.isAll ? take : undefined,
         }),
       ]);
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
+        pagination: !dto?.isAll ? pagination : undefined,
+        total,
+      });
     } catch (error) {}
   }
 
@@ -159,7 +164,7 @@ export class HealthRecordService {
               healthRecordId: heathRecord.id,
               height,
               weight,
-              indexBmi: `${indexBmi.toFixed(5)}`,
+              indexBmi: `${indexBmi.toFixed(2)}`,
 
               createdBy: memberId,
             },
@@ -172,7 +177,7 @@ export class HealthRecordService {
             data: {
               height,
               weight,
-              indexBmi: `${indexBmi.toFixed(5)}`,
+              indexBmi: `${indexBmi.toFixed(2)}`,
               updatedBy: memberId,
             },
           });
@@ -259,9 +264,8 @@ export class HealthRecordService {
             },
           });
         }
-
-        return ResponseSuccess({}, MESS_CODE['SUCCESS'], {});
       });
+      return ResponseSuccess({}, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       console.log('er', err.message);
       throw new BadRequestException(err.message);
@@ -297,7 +301,7 @@ export class HealthRecordService {
           height: true,
           weight: true,
           indexBmi: true,
-          createdAt:true
+          createdAt: true,
         },
       });
 

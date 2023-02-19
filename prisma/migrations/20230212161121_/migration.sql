@@ -62,7 +62,6 @@ CREATE TABLE `Patient` (
     `isDeleted` BOOLEAN NOT NULL DEFAULT false,
     `deletedBy` VARCHAR(32) NULL,
 
-    UNIQUE INDEX `Patient_doctorId_key`(`doctorId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

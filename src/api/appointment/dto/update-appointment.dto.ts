@@ -34,3 +34,4 @@ export class UpdateAppointmentDto {
   @ApiPropertyOptional({ example: '' })
   timeMeeting?: string;
 }
+

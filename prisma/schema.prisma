@@ -63,7 +63,7 @@ model User {
   password String? @db.VarChar(255)
   token    String? @db.VarChar(255)
   role     Role?   @default(DOCTOR)
-  memberId String? @unique @db.VarChar(32)
+  memberId String? @unique  @db.VarChar(32)
   //status   Status? @default(ACTIVE)
 
   createdAt DateTime @default(now())

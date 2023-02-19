@@ -115,7 +115,7 @@ export class DoctorService {
 
   async getAllPatient(memberId: string, dto: FilterPatientsWithDoctorIdDto, pagination: Pagination) {
     try {
-      console.log('memberId', memberId);
+      console.log('memberId', dto);
       const { skip, take } = pagination;
       let where: Prisma.PatientWhereInput = {
         isDeleted: false,

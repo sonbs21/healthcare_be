@@ -16,7 +16,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
-import { CreateHeartBeatDto, UpdateHeartbeatDto } from './dto';
+import { CreateHeartBeatDto, FilterHeartbeatDto, FilterHeartbeatGetMemberDto, UpdateHeartbeatDto } from './dto';
 import { HeartbeatService } from './heartbeat.service';
 
 @Controller('v1')
@@ -28,7 +28,7 @@ export class HeartbeatController {
 
   @Get('heartbeats')
   @HttpCode(HttpStatus.OK)
-  findAll(@Query() dto: any, @Paginate() pagination: Pagination) {
+  findAll(@Query() dto: FilterHeartbeatDto, @Paginate() pagination: Pagination) {
     return this.heartbeatService.findAll(dto, pagination);
   }
 
@@ -41,28 +41,24 @@ export class HeartbeatController {
   @Post('heartbeat')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateHeartBeatDto) {
-    return this.heartbeatService.create(user['memberID'],dto);
+    return this.heartbeatService.create(user['memberID'], dto);
   }
 
   @Get('get-heartbeat')
   @HttpCode(HttpStatus.OK)
-  getHeartbeat(@CurrentUser() user, @Paginate() pagination: Pagination) {
-    return this.heartbeatService.getHeartbeat(user['memberID'], pagination);
+  getHeartbeat(@CurrentUser() user, @Query() dto: FilterHeartbeatGetMemberDto, @Paginate() pagination: Pagination) {
+    return this.heartbeatService.getHeartbeat(user['memberID'], dto, pagination);
   }
 
   @Patch('heartbeat/:id')
   @HttpCode(HttpStatus.OK)
-  update(
-    @CurrentUser() user,
-    @Param('id') id: string,
-    @Body() dto: UpdateHeartbeatDto,
-  ) {
-    return this.heartbeatService.update(user['memberId'],id,dto);
+  update(@CurrentUser() user, @Param('id') id: string, @Body() dto: UpdateHeartbeatDto) {
+    return this.heartbeatService.update(user['memberId'], id, dto);
   }
 
   @Delete('heartbeat/:id')
   @HttpCode(HttpStatus.OK)
   remove(@CurrentUser() user, @Param('id') id: string) {
-    return this.heartbeatService.delete(user['memberId'],id);
+    return this.heartbeatService.delete(user['memberId'], id);
   }
 }
