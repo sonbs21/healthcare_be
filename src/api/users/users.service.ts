@@ -44,7 +44,23 @@ export class UsersService {
         },
       });
       if (me['role'] === Role.PATIENT) {
-        select['patient'] = true;
+        select['patient'] = {
+          select: {
+            id: true,
+            fullName: true,
+            phone: true,
+            gender: true,
+            dateOfBirth: true,
+            address: true,
+            avatar: true,
+            job: true,
+            insuranceNumber: true,
+            state: true,
+            medicalHistory: true,
+            doctorId: true,
+            carer: true,
+          },
+        };
       } else {
         select['doctor'] = true;
       }

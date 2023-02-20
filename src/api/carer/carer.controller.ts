@@ -17,7 +17,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { CarerService } from './carer.service';
-import { CreateCarerlDto, FilterCarerDto, UpdateCarerDto } from './dto';
+import { CreateCarerDto, FilterCarerDto, UpdateCarerDto } from './dto';
 
 @Controller('v1')
 @ApiTags('Carer')
@@ -46,7 +46,7 @@ export class CarerController {
 
   @Post('carer')
   @HttpCode(HttpStatus.CREATED)
-  create(@CurrentUser() user, @Body() dto: CreateCarerlDto) {
+  create(@CurrentUser() user, @Body() dto: CreateCarerDto) {
     return this.carerService.create(user['memberID'],dto);
   }
 

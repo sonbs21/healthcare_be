@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+import { SocketGateWayService } from '@api/socket-io/socket-io.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma, StatusAppointment, TypeNotification } from '@prisma/client';
 import { PrismaService } from '@services';
@@ -9,7 +10,7 @@ import { CreateAppointmentDto, FilterAppointmentDto, ReasonAppointmentDto, Updat
 
 @Injectable()
 export class AppointmentService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private prismaService: PrismaService, private socketsService: SocketGateWayService) {}
 
   async checkAppointmentExist(id) {
     const appointment = await this.prismaService.appointment.findFirst({
@@ -184,7 +185,7 @@ export class AppointmentService {
         },
       });
 
-      await this.prismaService.notification.create({
+      const notification = await this.prismaService.notification.create({
         data: {
           title: 'Đặt lịch hẹn',
           content: `Bệnh nhân ${patient.fullName} đã đặt lịch hẹn với bạn`,
@@ -192,6 +193,11 @@ export class AppointmentService {
           isRead: false,
           userId: patient.doctorId,
         },
+      });
+
+      await this.socketsService.newNotification({
+        notificationId: notification.id,
+        data: notification,
       });
       const data = await this.prismaService.appointment.create({
         data: {
@@ -233,7 +239,7 @@ export class AppointmentService {
         throw new BadRequestException(t(MESS_CODE['APPOINTMENT_NOT_FOUND'], {}));
       }
 
-      await this.prismaService.notification.create({
+      const notification = await this.prismaService.notification.create({
         data: {
           title: 'Đặt lịch hẹn thành công',
           content: `Bác sĩ ${doctor.fullName} đã đồng ý với lịch hẹn của bạn`,
@@ -241,6 +247,11 @@ export class AppointmentService {
           isRead: false,
           userId: appointment.patientId,
         },
+      });
+
+      await this.socketsService.newNotification({
+        notificationId: notification.id,
+        data: notification,
       });
 
       const data = await this.prismaService.appointment.update({
@@ -277,7 +288,7 @@ export class AppointmentService {
         throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
       }
 
-      await this.prismaService.notification.create({
+      const notification = await this.prismaService.notification.create({
         data: {
           title: 'Đặt lịch hẹn thất bại',
           content: `Bác sĩ ${doctor.fullName} đã từ chối với lịch hẹn của bạn với lý do: ${dto.reason}`,
@@ -285,6 +296,11 @@ export class AppointmentService {
           isRead: false,
           userId: appointment.patientId,
         },
+      });
+
+      await this.socketsService.newNotification({
+        notificationId: notification.id,
+        data: notification,
       });
 
       const data = await this.prismaService.appointment.update({
@@ -326,7 +342,7 @@ export class AppointmentService {
       }
 
       if (patient) {
-        await this.prismaService.notification.create({
+        const notification = await this.prismaService.notification.create({
           data: {
             title: 'Hủy lịch hẹn',
             content: `Bệnh nhân ${patient.fullName} đã hủy lịch hẹn với lý do: ${dto.reason}`,
@@ -335,10 +351,14 @@ export class AppointmentService {
             userId: patient.doctorId,
           },
         });
+        await this.socketsService.newNotification({
+          notificationId: notification.id,
+          data: notification,
+        });
       }
 
       if (doctor) {
-        await this.prismaService.notification.create({
+        const notification = await this.prismaService.notification.create({
           data: {
             title: 'Hủy lịch hẹn',
             content: `Bác sĩ ${doctor.fullName} đã hủy lịch hẹn với lý do: ${dto.reason}`,
@@ -346,6 +366,10 @@ export class AppointmentService {
             isRead: false,
             userId: appointment.doctorId,
           },
+        });
+        await this.socketsService.newNotification({
+          notificationId: notification.id,
+          data: notification,
         });
       }
 

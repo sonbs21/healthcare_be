@@ -2,7 +2,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateCarerlDto {
+export class CreateCarerDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ example: '' })

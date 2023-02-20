@@ -123,32 +123,32 @@ export class LoginUserService {
 
   async registerPatient(dto: RegisterPatientDto) {
     try {
-      console.log('RegisterPatientDto', dto?.password.length < 6);
+      const { carers, ...patientCreate } = dto;
       // Generate password
       // const randomPassword = randomize('Aa0', 8);
 
       // Check for user exists
       const userExist = await this.prismaService.user.findFirst({
         where: {
-          phone: dto.phone,
+          phone: patientCreate.phone,
           isDeleted: false,
         },
       });
       if (userExist) throw new BadRequestException(t(MESS_CODE['PHONE_EXIST']));
 
-      if (dto?.password.length < 6) {
+      if (patientCreate?.password.length < 6) {
         throw new BadRequestException(t(MESS_CODE['PASSWORD_INVALID']));
       }
-      const hash = await this.bcryptService.hash(dto.password);
-      delete dto.password;
+      const hash = await this.bcryptService.hash(patientCreate.password);
+      delete patientCreate.password;
 
-      const data = await this.prismaService.$transaction(async (prisma) => {
+      const data: any = await this.prismaService.$transaction(async (prisma) => {
         // Check for role exists
 
         // Create user
         const user = await prisma.user.create({
           data: {
-            phone: dto.phone,
+            phone: patientCreate.phone,
             role: Role.PATIENT,
             password: hash,
           },
@@ -156,7 +156,7 @@ export class LoginUserService {
 
         const patient = await prisma.patient.create({
           data: {
-            ...dto,
+            ...patientCreate,
             user: { connect: { id: user.id } },
           },
         });
@@ -167,6 +167,17 @@ export class LoginUserService {
             status: Status.SAFE,
             createdBy: patient.id,
           },
+        });
+
+        await carers.map(async (i) => {
+          await this.prismaService.carer.create({
+            data: {
+              patientId: patient.id,
+              phone: i.phone,
+              fullName: i.fullName,
+              createdBy: patient.id,
+            },
+          });
         });
 
         await prisma.user.update({
@@ -180,9 +191,11 @@ export class LoginUserService {
 
         return patient;
       });
+
       const { ...result } = data;
       return ResponseSuccess(result, MESS_CODE['SUCCESS'], {});
     } catch (err) {
+      console.log('err', err.message);
       throw new BadRequestException(err.message);
     }
   }

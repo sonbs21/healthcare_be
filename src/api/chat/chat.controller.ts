@@ -15,31 +15,26 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
-import { ConversationService } from './conversation.service';
+import { ChatService } from './chat.service';
+import { FilterChatDto, PostMessageDto } from './dto';
 
 @Controller('v1')
-@ApiTags('Conversation')
+@ApiTags('Chat')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
-export class ConversationController {
-  constructor(private readonly conversationService: ConversationService) {}
+export class ChatController {
+  constructor(private readonly chatService: ChatService) {}
 
-  @Get('conversation-member')
+  @Get('chat')
   @HttpCode(HttpStatus.OK)
-  findHealthRecordWithId(@CurrentUser() user) {
-    return this.conversationService.getAllConversationWithId(user['memberId']);
+  getMessage(@Param('id') id: string, dto: FilterChatDto, pagination: Pagination) {
+    return this.chatService.getMessage(id, dto, pagination);
   }
 
-  @Get('conversations')
-  @HttpCode(HttpStatus.OK)
-  findAll(@Query() dto: any, @Paginate() pagination: Pagination, @Headers() header) {
-    return this.conversationService.findAll(dto, pagination);
-  }
-
-  @Get('conversation/:id')
-  @HttpCode(HttpStatus.OK)
-  findOne(@Param('id') id: string, @Headers() header) {
-    return this.conversationService.findOne(id);
+  @Post('chat/:id')
+  @HttpCode(HttpStatus.CREATED)
+  postMessage(@CurrentUser() user, @Param('id') id: string, dto: PostMessageDto) {
+    return this.chatService.postMessage(user['memberId'], id, dto);
   }
 
   // @Patch('feature/:id')

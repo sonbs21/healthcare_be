@@ -1,8 +1,10 @@
 /* eslint-disable prettier/prettier */
+import { CreateCarerDto } from '@api/carer/dto';
 import { Gender } from '@enums';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
+  IsArray,
   IsDate,
   IsEmail,
   IsEnum,
@@ -128,4 +130,16 @@ export class RegisterPatientDto {
   @IsNotEmpty()
   @ApiProperty({ example: '' })
   medicalHistory: string;
+
+  @IsArray()
+  @IsOptional()
+  @ApiPropertyOptional({
+    example: [
+      {
+        phone: '0123456789',
+        fullName: 'Full Name',
+      },
+    ],
+  })
+  carers?: CreateCarerDto[];
 }

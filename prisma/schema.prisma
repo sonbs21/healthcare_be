@@ -63,7 +63,7 @@ model User {
   password String? @db.VarChar(255)
   token    String? @db.VarChar(255)
   role     Role?   @default(DOCTOR)
-  memberId String? @unique  @db.VarChar(32)
+  memberId String? @unique @db.VarChar(32)
   //status   Status? @default(ACTIVE)
 
   createdAt DateTime @default(now())
@@ -141,6 +141,8 @@ model Carer {
   fullName String @db.VarChar(255)
   phone    String @db.VarChar(255)
 
+  patientId String? @db.VarChar(32)
+
   createdAt DateTime @default(now())
   createdBy String?  @db.VarChar(32)
   updatedAt DateTime @updatedAt
@@ -148,7 +150,7 @@ model Carer {
   isDeleted Boolean  @default(false) @db.TinyInt()
   deletedBy String?  @db.VarChar(32)
 
-  patient Patient[] @relation("patient_carer")
+  patient Patient? @relation("patient_carer", fields: [patientId], references: [id])
 }
 
 model Conversation {
@@ -171,9 +173,10 @@ model Conversation {
 }
 
 model Message {
-  id          String       @id @default(cuid()) @db.VarChar(32)
-  typeMessage TypeMessage?
-  content     String?      @db.VarChar(255)
+  id          String  @id @default(cuid()) @db.VarChar(32)
+  // typeMessage TypeMessage?
+  content     String? @db.VarChar(255)
+  attachments Json?
 
   conversationId String? @db.VarChar(32)
 

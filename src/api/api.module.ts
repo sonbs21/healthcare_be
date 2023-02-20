@@ -13,6 +13,8 @@ import { GlucoseModule } from './glucose/glucose.module';
 import { HealthRecordModule } from './health-record/health-record.module';
 import { HeartbeatModule } from './heartbeat/heartbeat.module';
 import { PatientModule } from './patient/patient.module';
+import { SocketGateWayModule } from '@api/socket-io/socket-io.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { PatientModule } from './patient/patient.module';
     CholesterolModule,
     CarerModule,
     AppointmentModule,
+    ChatModule,
+    SocketGateWayModule,
   ],
   providers: [],
   exports: [],

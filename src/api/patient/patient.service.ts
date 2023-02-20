@@ -1,19 +1,18 @@
 /* eslint-disable prettier/prettier */
 import { ResponseSuccess } from '@/types';
 import { convertFilterStringToArray, MESS_CODE, t } from '@/utils';
+import { SocketGateWayService } from '@api/socket-io/socket-io.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma, TypeConversation, TypeNotification } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination } from '@types';
 import { cleanup } from '@utils';
-import * as _ from 'lodash';
-import * as moment from 'moment';
 import { patientSelect } from './conditions';
 import { FilterPatientsDto, SelectDoctorDto, UpdatePatientDto } from './dto';
 
 @Injectable()
 export class PatientService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private prismaService: PrismaService, private socketsService: SocketGateWayService) {}
 
   async findAll(dto: FilterPatientsDto, pagination: Pagination) {
     try {
@@ -134,7 +133,7 @@ export class PatientService {
 
         const arr = [memberId, dto.doctorId];
 
-        await prisma.conversation.create({
+        const conversation = await prisma.conversation.create({
           data: {
             avatar: null,
             typeConversation: TypeConversation.SINGLE,
@@ -143,7 +142,12 @@ export class PatientService {
           },
         });
 
-        await prisma.notification.create({
+        await this.socketsService.newConversation({
+          conversationId: conversation.id,
+          data: conversation,
+        });
+
+        const notification = await prisma.notification.create({
           data: {
             title: 'Chăm sóc bệnh nhân',
             content: `Bệnh nhân ${patient.fullName} đã được phân công cho bạn`,
@@ -153,6 +157,10 @@ export class PatientService {
           },
         });
 
+        await this.socketsService.newNotification({
+          notificationId: notification.id,
+          data: notification,
+        });
         // await this.prismaService
         return patient;
       });

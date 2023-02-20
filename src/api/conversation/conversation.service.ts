@@ -1,44 +1,39 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
-import { PrismaService } from "@services";
-import { Pagination } from "@types";
-import { cleanup } from "@utils";
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '@services';
+import { Pagination, ResponseSuccess } from '@types';
+import { cleanup, MESS_CODE } from '@utils';
 
 @Injectable()
 export class ConversationService {
-  constructor(
-    private prismaService: PrismaService,
-  ) {}
-  
-  async findAll( dto: any, pagination: Pagination){
+  constructor(private prismaService: PrismaService) {}
+
+  async findAll(dto: any, pagination: Pagination) {
     try {
-        let where:Prisma.ConversationWhereInput = {
-            isDeleted:false,
-        }
+      let where: Prisma.ConversationWhereInput = {
+        isDeleted: false,
+      };
 
-        const { skip, take } = pagination;
+      const { skip, take } = pagination;
 
+      where = cleanup(where);
 
-        where = cleanup(where)
-
-        const [total, data] = await this.prismaService.$transaction([
-            this.prismaService.conversation.count({ where }),
-            this.prismaService.conversation.findMany({
-              where,
-              select: {
-                id:true,
-                // type
-              },
-              orderBy: {
-                createdAt: 'desc',
-              },
-              skip: !dto?.isAll ? skip : undefined,
-              take: !dto?.isAll ? take : undefined,
-            }),
-          ]);
-    } catch (error) {
-        
-    }
+      const [total, data] = await this.prismaService.$transaction([
+        this.prismaService.conversation.count({ where }),
+        this.prismaService.conversation.findMany({
+          where,
+          select: {
+            id: true,
+            // type
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          skip: !dto?.isAll ? skip : undefined,
+          take: !dto?.isAll ? take : undefined,
+        }),
+      ]);
+    } catch (error) {}
   }
 
   async findOne(id: string) {
@@ -51,39 +46,41 @@ export class ConversationService {
           id,
           isDeleted: false,
         },
-        
       });
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS']);
     } catch (err) {
       throw new BadRequestException(err.message);
     }
   }
 
-  async getAllConversationWithId(memberId:string){
+  async getAllConversationWithId(memberId: string) {
     try {
-        let where:Prisma.ConversationWhereInput = {
-            isDeleted:false,
-        }
+      let where: Prisma.ConversationWhereInput = {
+        isDeleted: false,
+      };
 
-        where.AND = {member:{some:{memberId:memberId}}}
+      where.AND = { member: { some: { memberId: memberId } } };
 
-        where = cleanup(where)
+      where = cleanup(where);
 
-        const [total, data] = await this.prismaService.$transaction([
-            this.prismaService.conversation.count({ where }),
-            this.prismaService.conversation.findMany({
-              where,
-              select: {
-                id:true,
-                // type
-              },
-              orderBy: {
-                createdAt: 'desc',
-              },
-            }),
-          ]);
-    } catch (error) {
-        
-    }
+      const [total, data] = await this.prismaService.$transaction([
+        this.prismaService.conversation.count({ where }),
+        this.prismaService.conversation.findMany({
+          where,
+          select: {
+            id: true,
+            // type
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        }),
+      ]);
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
+        total,
+      });
+    } catch (error) {}
   }
-
 }

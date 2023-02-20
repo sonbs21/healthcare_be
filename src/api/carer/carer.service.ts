@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
 import { cleanup, convertFilterStringToArray, MESS_CODE, t } from '@utils';
-import { CreateCarerlDto, FilterCarerDto, UpdateCarerDto } from './dto';
+import { CreateCarerDto, FilterCarerDto, UpdateCarerDto } from './dto';
 
 @Injectable()
 export class CarerService {
@@ -91,9 +91,9 @@ export class CarerService {
       const { skip, take } = pagination;
 
       const [total, data] = await this.prismaService.$transaction([
-        this.prismaService.carer.count({ where: { patient: { some: { id: memberId } } } }),
+        this.prismaService.carer.count({ where: { patientId: memberId } }),
         this.prismaService.carer.findMany({
-          where: { patient: { some: { id: memberId } } },
+          where: { patientId: memberId },
           orderBy: {
             createdAt: 'desc',
           },
@@ -111,7 +111,7 @@ export class CarerService {
     }
   }
 
-  async create(memberId: string, dto: CreateCarerlDto) {
+  async create(memberId: string, dto: CreateCarerDto) {
     try {
       const { fullName, phone } = dto;
 
