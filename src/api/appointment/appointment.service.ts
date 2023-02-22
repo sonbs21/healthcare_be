@@ -78,6 +78,18 @@ export class AppointmentService {
           id,
           isDeleted: false,
         },
+        select: {
+          fullName: true,
+          dateOfBirth: true,
+          dateMeeting: true,
+          phone: true,
+          notes: true,
+          reason: true,
+          timeMeeting: true,
+          statusAppointment: true,
+          doctor: true,
+          patient: true,
+        },
       });
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {

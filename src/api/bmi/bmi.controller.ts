@@ -42,13 +42,13 @@ export class BmiController {
   @Get('get-bmi')
   @HttpCode(HttpStatus.OK)
   getBmi(@CurrentUser() user, @Query() dto: FilterBmiGetMemberDto, @Paginate() pagination: Pagination) {
-    return this.bmiService.getBmi(user['memberID'], dto, pagination);
+    return this.bmiService.getBmi(user['memberId'], dto, pagination);
   }
 
   @Post('bmi')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateBmiDto) {
-    return this.bmiService.create(user['memberID'], dto);
+    return this.bmiService.create(user['memberId'], dto);
   }
 
   @Patch('bmi/:id')

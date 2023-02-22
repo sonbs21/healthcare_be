@@ -43,12 +43,12 @@ export class AppointmentController {
   @Get('get-appointment-doctor')
   @HttpCode(HttpStatus.OK)
   getAppointmentDoctor(@CurrentUser() user, @Query() dto: FilterAppointmentDto, @Paginate() pagination: Pagination) {
-    return this.appointmentService.getAppointmentDoctor(user['memberID'], dto, pagination);
+    return this.appointmentService.getAppointmentDoctor(user['memberId'], dto, pagination);
   }
   @Get('get-appointment-patient')
   @HttpCode(HttpStatus.OK)
   getAppointmentPatient(@CurrentUser() user, @Query() dto: FilterAppointmentDto, @Paginate() pagination: Pagination) {
-    return this.appointmentService.getAppointmentPatient(user['memberID'], dto, pagination);
+    return this.appointmentService.getAppointmentPatient(user['memberId'], dto, pagination);
   }
   @Post('appointment')
   @HttpCode(HttpStatus.CREATED)

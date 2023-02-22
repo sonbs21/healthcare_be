@@ -118,52 +118,54 @@ export class PatientService {
       });
       if (!exist) throw new BadRequestException(t(MESS_CODE['DOCTOR_NOT_FOUND']));
 
-      const data = await this.prismaService.$transaction(async (prisma) => {
-        await prisma.patient.update({
-          where: { id: memberId },
-          data: {
-            doctorId: dto.doctorId,
-          },
-        });
-
-        const patient = await prisma.patient.findFirst({
-          where: { id: memberId },
-          select: patientSelect,
-        });
-
-        const arr = [memberId, dto.doctorId];
-
-        const conversation = await prisma.conversation.create({
-          data: {
-            avatar: null,
-            typeConversation: TypeConversation.SINGLE,
-            leaderId: dto.doctorId,
-            member: arr.length ? { connect: arr.map((v) => ({ memberId: v })) } : undefined,
-          },
-        });
-
-        await this.socketsService.newConversation({
-          conversationId: conversation.id,
-          data: conversation,
-        });
-
-        const notification = await prisma.notification.create({
-          data: {
-            title: 'Chăm sóc bệnh nhân',
-            content: `Bệnh nhân ${patient.fullName} đã được phân công cho bạn`,
-            typeNotification: TypeNotification.SYSTEM,
-            isRead: false,
-            userId: dto.doctorId,
-          },
-        });
-
-        await this.socketsService.newNotification({
-          notificationId: notification.id,
-          data: notification,
-        });
-        // await this.prismaService
-        return patient;
+      const patient = await this.prismaService.patient.findFirst({
+        where: { id: memberId },
+        select: patientSelect,
       });
+
+      console.log('patient', patient);
+
+      if (patient?.doctorId !== null) {
+        throw new BadRequestException(t(MESS_CODE['DOCTOR_NOT_FOUND']));
+      }
+      const data = await this.prismaService.patient.update({
+        where: { id: memberId },
+        data: {
+          doctorId: dto.doctorId,
+        },
+      });
+
+      const arr = [memberId, dto.doctorId];
+      const conversation = await this.prismaService.conversation.create({
+        data: {
+          avatar: null,
+          typeConversation: TypeConversation.SINGLE,
+          leaderId: dto.doctorId,
+          member: arr.length ? { connect: arr.map((v) => ({ memberId: v })) } : undefined,
+        },
+      });
+
+      await this.socketsService.newConversation({
+        conversationId: conversation.id,
+        data: conversation,
+      });
+
+      const notification = await this.prismaService.notification.create({
+        data: {
+          title: 'Chăm sóc bệnh nhân',
+          content: `Bệnh nhân ${patient.fullName} đã được phân công cho bạn`,
+          typeNotification: TypeNotification.SYSTEM,
+          isRead: false,
+          userId: dto.doctorId,
+        },
+      });
+
+      await this.socketsService.newNotification({
+        notificationId: notification.id,
+        data: notification,
+      });
+      // await this.prismaService
+
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       console.log(err.message);

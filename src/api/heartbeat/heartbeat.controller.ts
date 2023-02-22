@@ -41,13 +41,13 @@ export class HeartbeatController {
   @Post('heartbeat')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateHeartBeatDto) {
-    return this.heartbeatService.create(user['memberID'], dto);
+    return this.heartbeatService.create(user['memberId'], dto);
   }
 
   @Get('get-heartbeat')
   @HttpCode(HttpStatus.OK)
   getHeartbeat(@CurrentUser() user, @Query() dto: FilterHeartbeatGetMemberDto, @Paginate() pagination: Pagination) {
-    return this.heartbeatService.getHeartbeat(user['memberID'], dto, pagination);
+    return this.heartbeatService.getHeartbeat(user['memberId'], dto, pagination);
   }
 
   @Patch('heartbeat/:id')

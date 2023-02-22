@@ -78,6 +78,7 @@ export class SocketGateWayService implements OnModuleInit {
   @SubscribeMessage('newConversation')
   async newConversation(@MessageBody() body: { conversationId: string; data: object | object[] | any }) {
     const lstMember = [];
+    console.log('body', body);
     const conversation = await this.prismaService.conversation.findFirst({
       where: {
         id: body.conversationId,
@@ -86,6 +87,8 @@ export class SocketGateWayService implements OnModuleInit {
         member: true,
       },
     });
+
+    console.log('socket', conversation);
 
     await conversation.member.map((item) => {
       lstMember.push(item.id);

@@ -51,13 +51,13 @@ export class BloodPressureController {
     @Query() dto: FilterBloodPressureGetMemberDto,
     @Paginate() pagination: Pagination,
   ) {
-    return this.bloodPressureService.getBloodPressure(user['memberID'], dto, pagination);
+    return this.bloodPressureService.getBloodPressure(user['memberId'], dto, pagination);
   }
 
   @Post('blood-pressure')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateBloodPressureDto) {
-    return this.bloodPressureService.create(user['memberID'], dto);
+    return this.bloodPressureService.create(user['memberId'], dto);
   }
 
   @Patch('blood-pressure/:id')
@@ -68,7 +68,7 @@ export class BloodPressureController {
 
   @Delete('blood-pressure/:id')
   @HttpCode(HttpStatus.OK)
-  remove(@CurrentUser() user, @Param('id') id: string, @Headers() header) {
+  remove(@CurrentUser() user, @Param('id') id: string) {
     return this.bloodPressureService.delete(user['memberId'], id);
   }
 }

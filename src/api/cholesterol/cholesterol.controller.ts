@@ -41,13 +41,13 @@ export class CholesterolController {
   @Get('get-cholesterol')
   @HttpCode(HttpStatus.OK)
   getCholesterol(@CurrentUser() user, @Query() dto: FilterCholesterolGetMemberDto, @Paginate() pagination: Pagination) {
-    return this.cholesterolService.getCholesterol(user['memberID'], dto, pagination);
+    return this.cholesterolService.getCholesterol(user['memberId'], dto, pagination);
   }
 
   @Post('cholesterol')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateCholesterolDto) {
-    return this.cholesterolService.create(user['memberID'], dto);
+    return this.cholesterolService.create(user['memberId'], dto);
   }
 
   @Patch('cholesterol/:id')

@@ -41,13 +41,13 @@ export class CarerController {
   @Get('get-carer')
   @HttpCode(HttpStatus.OK)
   getCarer(@CurrentUser() user, @Paginate() pagination: Pagination) {
-    return this.carerService.getCarer(user['memberID'], pagination);
+    return this.carerService.getCarer(user['memberId'], pagination);
   }
 
   @Post('carer')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateCarerDto) {
-    return this.carerService.create(user['memberID'],dto);
+    return this.carerService.create(user['memberId'],dto);
   }
 
   @Patch('carer/:id')

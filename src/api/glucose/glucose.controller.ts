@@ -41,13 +41,13 @@ export class GlucoseController {
   @Get('get-glucose')
   @HttpCode(HttpStatus.OK)
   getGlucose(@CurrentUser() user, @Query() dto: FilterGlucoseGetMemberDto, @Paginate() pagination: Pagination) {
-    return this.glucoseService.getGlucose(user['memberID'], dto, pagination);
+    return this.glucoseService.getGlucose(user['memberId'], dto, pagination);
   }
 
   @Post('glucose')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateGlucoseDto) {
-    return this.glucoseService.create(user['memberID'], dto);
+    return this.glucoseService.create(user['memberId'], dto);
   }
 
   @Patch('glucose/:id')

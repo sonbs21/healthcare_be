@@ -17,14 +17,12 @@ export class FilterAppointmentDto {
 
   @IsDate()
   @IsOptional()
-  @Transform(({ value }) => (value ? moment(value).toDate() : value))
-  @ApiPropertyOptional({ example: moment().toDate() })
+  @ApiPropertyOptional()
   startDate?: Date;
 
   @IsDate()
   @IsOptional()
-  @Transform(({ value }) => (value ? moment(value).toDate() : value))
-  @ApiPropertyOptional({ example: moment().toDate() })
+  @ApiPropertyOptional()
   endDate?: Date;
 
   @IsBoolean()
