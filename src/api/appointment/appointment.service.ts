@@ -126,6 +126,18 @@ export class AppointmentService {
                   }
                 : undefined,
           },
+          select: {
+            fullName: true,
+            dateOfBirth: true,
+            dateMeeting: true,
+            phone: true,
+            notes: true,
+            reason: true,
+            timeMeeting: true,
+            statusAppointment: true,
+            doctor: true,
+            patient: true,
+          },
           orderBy: {
             createdAt: 'desc',
           },
@@ -171,6 +183,18 @@ export class AppointmentService {
                     lte: endDate ? moment(endDate).toISOString() : undefined,
                   }
                 : undefined,
+          },
+          select: {
+            fullName: true,
+            dateOfBirth: true,
+            dateMeeting: true,
+            phone: true,
+            notes: true,
+            reason: true,
+            timeMeeting: true,
+            statusAppointment: true,
+            doctor: true,
+            patient: true,
           },
           orderBy: {
             createdAt: 'desc',
@@ -279,7 +303,7 @@ export class AppointmentService {
     } catch (error) {}
   }
 
-  async refuse(memberId: string, id: string, dto: ReasonAppointmentDto) {
+  async refuse(memberId: string, id: string) {
     try {
       const doctor = await this.prismaService.doctor.findFirst({
         where: {
@@ -303,7 +327,7 @@ export class AppointmentService {
       const notification = await this.prismaService.notification.create({
         data: {
           title: 'Đặt lịch hẹn thất bại',
-          content: `Bác sĩ ${doctor.fullName} đã từ chối với lịch hẹn của bạn với lý do: ${dto.reason}`,
+          content: `Bác sĩ ${doctor.fullName} đã từ chối với lịch hẹn của bạn`,
           typeNotification: TypeNotification.APPOINTMENT,
           isRead: false,
           userId: appointment.patientId,
@@ -321,7 +345,7 @@ export class AppointmentService {
         },
         data: {
           statusAppointment: StatusAppointment.REFUSED,
-          reason: dto.reason,
+          // reason: dto.reason,
           updatedBy: memberId,
         },
       });
@@ -329,7 +353,7 @@ export class AppointmentService {
     } catch (error) {}
   }
 
-  async cancel(memberId: string, id: string, dto: ReasonAppointmentDto) {
+  async cancel(memberId: string, id: string) {
     try {
       const patient = await this.prismaService.patient.findFirst({
         where: {
@@ -357,7 +381,7 @@ export class AppointmentService {
         const notification = await this.prismaService.notification.create({
           data: {
             title: 'Hủy lịch hẹn',
-            content: `Bệnh nhân ${patient.fullName} đã hủy lịch hẹn với lý do: ${dto.reason}`,
+            content: `Bệnh nhân ${patient.fullName} đã hủy lịch hẹn`,
             typeNotification: TypeNotification.APPOINTMENT,
             isRead: false,
             userId: patient.doctorId,
@@ -373,7 +397,7 @@ export class AppointmentService {
         const notification = await this.prismaService.notification.create({
           data: {
             title: 'Hủy lịch hẹn',
-            content: `Bác sĩ ${doctor.fullName} đã hủy lịch hẹn với lý do: ${dto.reason}`,
+            content: `Bác sĩ ${doctor.fullName} đã hủy lịch hẹn`,
             typeNotification: TypeNotification.APPOINTMENT,
             isRead: false,
             userId: appointment.doctorId,
@@ -391,7 +415,7 @@ export class AppointmentService {
         },
         data: {
           statusAppointment: StatusAppointment.CANCELED,
-          reason: dto.reason,
+          // reason: dto.reason,
           updatedBy: memberId,
         },
       });

@@ -76,13 +76,13 @@ export class AppointmentController {
 
   @Put('appointment/:id/refuse')
   @HttpCode(HttpStatus.OK)
-  refuse(@CurrentUser() user, @Param('id') id: string, @Body() dto: ReasonAppointmentDto) {
-    return this.appointmentService.refuse(user['memberId'], id, dto);
+  refuse(@CurrentUser() user, @Param('id') id: string) {
+    return this.appointmentService.refuse(user['memberId'], id);
   }
 
   @Put('appointment/:id/cancel')
   @HttpCode(HttpStatus.OK)
-  cancel(@CurrentUser() user, @Param('id') id: string, @Body() dto: ReasonAppointmentDto) {
-    return this.appointmentService.cancel(user['memberId'], id, dto);
+  cancel(@CurrentUser() user, @Param('id') id: string) {
+    return this.appointmentService.cancel(user['memberId'], id);
   }
 }
