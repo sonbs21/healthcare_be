@@ -117,7 +117,6 @@ export class LoginUserService {
       const { ...result } = data;
       return ResponseSuccess(result, MESS_CODE['SUCCESS'], {});
     } catch (err) {
-      console.log(err.message);
       throw new BadRequestException(err.message);
     }
   }
@@ -196,7 +195,6 @@ export class LoginUserService {
       const { ...result } = data;
       return ResponseSuccess(result, MESS_CODE['SUCCESS'], {});
     } catch (err) {
-      console.log('err', err.message);
       throw new BadRequestException(err.message);
     }
   }

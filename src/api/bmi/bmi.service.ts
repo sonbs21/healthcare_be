@@ -103,13 +103,11 @@ export class BmiService {
   async getBmi(memberId: string, dto: FilterBmiGetMemberDto, pagination: Pagination) {
     try {
       const { skip, take } = pagination;
-      console.log('memberId', memberId);
       const healthRecord = await this.prismaService.healthRecord.findFirst({
         where: { patientId: memberId },
         select: { id: true },
       });
 
-      console.log('healthRecord', healthRecord);
 
       const [total, data] = await this.prismaService.$transaction([
         this.prismaService.bmi.count({ where: { healthRecordId: healthRecord.id } }),

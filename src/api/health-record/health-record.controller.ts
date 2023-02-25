@@ -29,8 +29,8 @@ export class HealthRecordController {
 
   @Get('health-record-member')
   @HttpCode(HttpStatus.OK)
-  findHealthRecordWithId(@CurrentUser() user, @Query() dto: FilterHealthRecordDto) {
-    return this.healthRecordService.findHealthRecordWithId(user['memberId'], dto);
+  findHealthRecordWithId(@CurrentUser() user, @Query() dto: FilterHealthRecordDto, @Paginate() pagination: Pagination) {
+    return this.healthRecordService.findHealthRecordWithId(user['memberId'], dto, pagination);
   }
 
   @Get('health-records')

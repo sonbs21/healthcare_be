@@ -22,7 +22,6 @@ export class DoctorController {
   @Get('doctor/patients')
   @HttpCode(HttpStatus.OK)
   getAllPatient(@CurrentUser() user, @Query() dto: FilterPatientsWithDoctorIdDto, @Paginate() pagination: Pagination) {
-    console.log(user);
     return this.doctorService.getAllPatient(user['memberId'], dto, pagination);
   }
   @Get('doctor/:id')

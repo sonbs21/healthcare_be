@@ -85,6 +85,10 @@ export class DoctorService {
         where: { id },
         select: doctorsSelect,
       });
+
+      const patientCount = data.patient.length;
+      data['countPatient'] = patientCount;
+
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       throw new BadRequestException(err.message);
@@ -107,7 +111,6 @@ export class DoctorService {
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
-      console.log(err);
 
       throw new BadRequestException(err.message);
     }
@@ -115,7 +118,6 @@ export class DoctorService {
 
   async getAllPatient(memberId: string, dto: FilterPatientsWithDoctorIdDto, pagination: Pagination) {
     try {
-      console.log('memberId', dto);
       const { skip, take } = pagination;
       let where: Prisma.PatientWhereInput = {
         isDeleted: false,

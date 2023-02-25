@@ -12,7 +12,6 @@ export const ResponseSuccess = (
     other?: any;
   } = {},
 ) => {
-  console.log('ss', options);
   const { statusCode, pagination = {}, total = 0, other } = options;
   let paginate = undefined;
   if (Object.keys(pagination).length) {

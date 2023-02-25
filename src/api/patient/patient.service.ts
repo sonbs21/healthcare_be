@@ -105,8 +105,6 @@ export class PatientService {
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
-      console.log(err);
-
       throw new BadRequestException(err.message);
     }
   }
@@ -122,8 +120,6 @@ export class PatientService {
         where: { id: memberId },
         select: patientSelect,
       });
-
-      console.log('patient', patient);
 
       if (patient?.doctorId !== null) {
         throw new BadRequestException(t(MESS_CODE['DOCTOR_NOT_FOUND']));
@@ -168,8 +164,6 @@ export class PatientService {
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
-      console.log(err.message);
-
       throw new BadRequestException(err.message);
     }
   }
@@ -189,8 +183,6 @@ export class PatientService {
         },
       });
 
-      // console.log(memberId);
-
       const conversation = await this.prismaService.conversation.findMany({
         where: {
           member: { some: { id: { in: id } } },
@@ -198,7 +190,6 @@ export class PatientService {
           isDeleted: false,
         },
       });
-      console.log(conversation);
 
       await Promise.all(
         conversation.map(async (i) => {
@@ -227,8 +218,6 @@ export class PatientService {
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
-      console.log(err);
-
       throw new BadRequestException(err.message);
     }
   }

@@ -12,29 +12,127 @@ import { CreateHealthRecordDto } from './dto/create-health-record.dto';
 export class HealthRecordService {
   constructor(private prismaService: PrismaService) {}
 
-  async findHealthRecordWithId(memberId: string, dto: FilterHealthRecordDto) {
+  async findHealthRecordWithId(memberId: string, dto: FilterHealthRecordDto, pagination: Pagination) {
     try {
-      let where: Prisma.ConversationWhereInput = {
-        isDeleted: false,
-      };
-
-      where.AND = { member: { some: { memberId: memberId } } };
-
-      where = cleanup(where);
+      const { skip, take } = pagination;
+      const healthRecord = await this.prismaService.healthRecord.findFirst({
+        where: {
+          patientId: memberId,
+        },
+        select: {
+          id: true,
+        },
+      });
 
       const [total, data] = await this.prismaService.$transaction([
-        this.prismaService.healthRecord.count({ where }),
-        this.prismaService.healthRecord.findMany({
-          where,
+        this.prismaService.bloodPressure.count({ where: { healthRecordId: healthRecord.id } }),
+        this.prismaService.bloodPressure.findMany({
+          where: { healthRecordId: healthRecord.id },
           select: {
             id: true,
+            createdAt: true,
+            healthRecordId: true,
+            systolic: true,
+            diastolic: true,
             // type
           },
           orderBy: {
             createdAt: 'desc',
           },
+          skip: !dto?.isAll ? skip : undefined,
+          take: !dto?.isAll ? take : undefined,
         }),
       ]);
+
+      await Promise.all(data.map(async (i) => {
+        const bmi = await this.prismaService.bmi.findFirst({
+          where: {
+            healthRecordId: healthRecord.id,
+            createdAt: {
+              gte: i?.createdAt,
+              lte: i?.createdAt,
+            },
+          },
+          select: {
+            height: true,
+            weight: true,
+            indexBmi: true,
+            createdAt: true,
+          },
+        });
+  
+        i['height'] = bmi?.height ?? '';
+        i['weight'] = bmi?.weight ?? '';
+        i['indexBmi'] = bmi?.indexBmi ?? '';
+  
+        const heartbeat = await this.prismaService.heartbeat.findFirst({
+          where: {
+            healthRecordId: healthRecord.id,
+            createdAt: {
+              gte: i?.createdAt,
+              lte: i?.createdAt,
+            },
+          },
+          select: {
+            heartRateIndicator: true,
+          },
+        });
+  
+        i['heartbeat'] = heartbeat?.heartRateIndicator ?? '';
+  
+        const glucose = await this.prismaService.glucose.findFirst({
+          where: {
+            healthRecordId: healthRecord.id,
+            createdAt: {
+              gte: i?.createdAt,
+              lte: i?.createdAt,
+            },
+          },
+          select: {
+            glucose: true,
+          },
+        });
+  
+        i['glucose'] = glucose?.glucose ?? '';
+  
+        const cholesterol = await this.prismaService.cholesterol.findFirst({
+          where: {
+            healthRecordId: healthRecord.id,
+            createdAt: {
+              gte: i?.createdAt,
+              lte: i?.createdAt,
+            },
+          },
+          select: {
+            cholesterol: true,
+          },
+        });
+  
+        i['cholesterol'] = cholesterol?.cholesterol ?? '';
+      }));
+
+      // const bloodPressure = await this.prismaService.bloodPressure.findFirst({
+      //   where: {
+      //     healthRecordId: healthRecord.id,
+      //     createdAt: {
+      //       gte: moment().startOf('D').toISOString(),
+      //       lte: moment().endOf('D').toISOString(),
+      //     },
+      //   },
+      //   select: {
+      //     systolic: true,
+      //     diastolic: true,
+      //   },
+      // });
+      // data['systolic'] = bloodPressure?.systolic ?? '';
+      // data['diastolic'] = bloodPressure?.diastolic ?? '';
+
+      
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
+        pagination: !dto?.isAll ? pagination : undefined,
+        total,
+      });
     } catch (error) {}
   }
 
@@ -267,7 +365,6 @@ export class HealthRecordService {
       });
       return ResponseSuccess({}, MESS_CODE['SUCCESS'], {});
     } catch (err) {
-      console.log('er', err.message);
       throw new BadRequestException(err.message);
     }
   }
