@@ -79,6 +79,7 @@ export class AppointmentService {
           isDeleted: false,
         },
         select: {
+          id: true,
           fullName: true,
           dateOfBirth: true,
           dateMeeting: true,
@@ -127,6 +128,7 @@ export class AppointmentService {
                 : undefined,
           },
           select: {
+            id: true,
             fullName: true,
             dateOfBirth: true,
             dateMeeting: true,
@@ -185,6 +187,7 @@ export class AppointmentService {
                 : undefined,
           },
           select: {
+            id: true,
             fullName: true,
             dateOfBirth: true,
             dateMeeting: true,
