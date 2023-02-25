@@ -256,6 +256,46 @@ export class AppointmentService {
     } catch (error) {}
   }
 
+  async post(memberId: string, id: string, dto: CreateAppointmentDto) {
+    try {
+      const doctor = await this.prismaService.patient.findFirst({
+        where: {
+          id: memberId,
+        },
+      });
+
+      const notification = await this.prismaService.notification.create({
+        data: {
+          title: 'Đặt lịch hẹn',
+          content: `Bác sĩ ${doctor.fullName} đã đặt lịch hẹn với bạn`,
+          typeNotification: TypeNotification.APPOINTMENT,
+          isRead: false,
+          userId: id,
+        },
+      });
+
+      await this.socketsService.newNotification({
+        notificationId: notification.id,
+        data: notification,
+      });
+      const data = await this.prismaService.appointment.create({
+        data: {
+          fullName: dto.fullName,
+          phone: dto.phone,
+          notes: dto.notes,
+          dateOfBirth: dto.dateOfBirth,
+          dateMeeting: dto.dateMeeting,
+          timeMeeting: dto.timeMeeting,
+          statusAppointment: StatusAppointment.APPROVED,
+          patientId: id,
+          doctorId: memberId,
+          createdBy: memberId,
+        },
+      });
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
+    } catch (error) {}
+  }
+
   async approve(memberId: string, id: string) {
     try {
       const doctor = await this.prismaService.doctor.findFirst({

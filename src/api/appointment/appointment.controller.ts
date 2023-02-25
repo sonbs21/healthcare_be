@@ -56,6 +56,12 @@ export class AppointmentController {
     return this.appointmentService.create(user['memberId'], dto);
   }
 
+  @Post('appointment-doctor')
+  @HttpCode(HttpStatus.CREATED)
+  post(@CurrentUser() user, @Param('id') id: string, @Body() dto: CreateAppointmentDto) {
+    return this.appointmentService.post(user['memberId'], id, dto);
+  }
+
   @Patch('appointment/:id')
   @HttpCode(HttpStatus.OK)
   update(@CurrentUser() user, @Param('id') id: string, @Body() dto: UpdateAppointmentDto) {
