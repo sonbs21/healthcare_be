@@ -19,11 +19,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
-import {
-  CreateNotificationsDto,
-  FilterNotificationsDto,
-  UpdateNotificationDto,
-} from './dto';
+import { CreateNotificationsDto, FilterNotificationsDto, UpdateNotificationDto } from './dto';
 
 @Controller('v1')
 @ApiTags('Notifications')
@@ -34,16 +30,8 @@ export class NotificationsController {
 
   @Get('notifications')
   @HttpCode(HttpStatus.OK)
-  findAll(
-    @CurrentUser() user,
-    @Query() dto: FilterNotificationsDto,
-    @Paginate() pagination: Pagination,
-  ) {
-    return this.notificationsService.findAll(
-      user['memberId'],
-      dto,
-      pagination,
-    );
+  findAll(@CurrentUser() user, @Query() dto: FilterNotificationsDto, @Paginate() pagination: Pagination) {
+    return this.notificationsService.findAll(user['memberId'], dto, pagination);
   }
 
   @Get('notification/:id')
@@ -52,30 +40,22 @@ export class NotificationsController {
     return this.notificationsService.findOne(id);
   }
 
+  @Get('get-notifications')
+  @HttpCode(HttpStatus.OK)
+  getAll(@CurrentUser() user, @Query() dto: FilterNotificationsDto, @Paginate() pagination: Pagination) {
+    return this.notificationsService.getAll(user['memberId'], dto, pagination);
+  }
+
   @Post('notification')
   @HttpCode(HttpStatus.CREATED)
-  create(
-    @CurrentUser() user,
-    @Body() dto: CreateNotificationsDto,
-  ) {
-    return this.notificationsService.create(
-      user['memberId'],
-      dto,
-    );
+  create(@CurrentUser() user, @Body() dto: CreateNotificationsDto) {
+    return this.notificationsService.create(user['memberId'], dto);
   }
 
   @Patch('notification/:id')
   @HttpCode(HttpStatus.OK)
-  update(
-    @CurrentUser() user,
-    @Param('id') id: string,
-    @Body() dto: UpdateNotificationDto,
-  ) {
-    return this.notificationsService.update(
-      user['memberId'],
-      id,
-      dto,
-    );
+  update(@CurrentUser() user, @Param('id') id: string, @Body() dto: UpdateNotificationDto) {
+    return this.notificationsService.update(user['memberId'], id, dto);
   }
 
   @Put('notification/:id/read')
@@ -89,7 +69,6 @@ export class NotificationsController {
   readAll(@CurrentUser() user) {
     return this.notificationsService.readAll(user['memberId']);
   }
-
 
   @Delete('notification/:id')
   @HttpCode(HttpStatus.OK)

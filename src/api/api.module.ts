@@ -15,6 +15,7 @@ import { HeartbeatModule } from './heartbeat/heartbeat.module';
 import { PatientModule } from './patient/patient.module';
 import { SocketGateWayModule } from '@api/socket-io/socket-io.module';
 import { ChatModule } from './chat/chat.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ChatModule } from './chat/chat.module';
     AppointmentModule,
     ChatModule,
     SocketGateWayModule,
+    NotificationsModule,
   ],
   providers: [],
   exports: [],

@@ -1,12 +1,18 @@
 /* eslint-disable prettier/prettier */
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class FilterNotificationsDto {
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({ example: '' })
   search?: string;
+  @IsBoolean()
+  @Transform(({ obj, key }) => obj[key] === 'true')
+  @IsOptional()
+  @ApiPropertyOptional({ example: false })
+  isAll?: boolean;
 
   @IsNumber()
   @IsOptional()
