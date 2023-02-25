@@ -39,6 +39,7 @@ export class LoginUserService {
       if (!isPasswordMatch) throw new BadRequestException(t(MESS_CODE['PHONE_OR_PASSWORD_INCORRECT']));
 
       const data = await this.authService.login(phoneExist);
+      data['role'] = phoneExist.role;
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       throw new BadRequestException(err.message);
