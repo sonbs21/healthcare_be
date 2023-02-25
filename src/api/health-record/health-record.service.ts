@@ -44,72 +44,74 @@ export class HealthRecordService {
         }),
       ]);
 
-      await Promise.all(data.map(async (i) => {
-        const bmi = await this.prismaService.bmi.findFirst({
-          where: {
-            healthRecordId: healthRecord.id,
-            createdAt: {
-              gte: i?.createdAt,
-              lte: i?.createdAt,
+      await Promise.all(
+        data.map(async (i) => {
+          const bmi = await this.prismaService.bmi.findFirst({
+            where: {
+              healthRecordId: healthRecord.id,
+              createdAt: {
+                gte: i?.createdAt,
+                lte: i?.createdAt,
+              },
             },
-          },
-          select: {
-            height: true,
-            weight: true,
-            indexBmi: true,
-            createdAt: true,
-          },
-        });
-  
-        i['height'] = bmi?.height ?? '';
-        i['weight'] = bmi?.weight ?? '';
-        i['indexBmi'] = bmi?.indexBmi ?? '';
-  
-        const heartbeat = await this.prismaService.heartbeat.findFirst({
-          where: {
-            healthRecordId: healthRecord.id,
-            createdAt: {
-              gte: i?.createdAt,
-              lte: i?.createdAt,
+            select: {
+              height: true,
+              weight: true,
+              indexBmi: true,
+              createdAt: true,
             },
-          },
-          select: {
-            heartRateIndicator: true,
-          },
-        });
-  
-        i['heartbeat'] = heartbeat?.heartRateIndicator ?? '';
-  
-        const glucose = await this.prismaService.glucose.findFirst({
-          where: {
-            healthRecordId: healthRecord.id,
-            createdAt: {
-              gte: i?.createdAt,
-              lte: i?.createdAt,
+          });
+
+          i['height'] = bmi?.height ?? '';
+          i['weight'] = bmi?.weight ?? '';
+          i['indexBmi'] = bmi?.indexBmi ?? '';
+
+          const heartbeat = await this.prismaService.heartbeat.findFirst({
+            where: {
+              healthRecordId: healthRecord.id,
+              createdAt: {
+                gte: i?.createdAt,
+                lte: i?.createdAt,
+              },
             },
-          },
-          select: {
-            glucose: true,
-          },
-        });
-  
-        i['glucose'] = glucose?.glucose ?? '';
-  
-        const cholesterol = await this.prismaService.cholesterol.findFirst({
-          where: {
-            healthRecordId: healthRecord.id,
-            createdAt: {
-              gte: i?.createdAt,
-              lte: i?.createdAt,
+            select: {
+              heartRateIndicator: true,
             },
-          },
-          select: {
-            cholesterol: true,
-          },
-        });
-  
-        i['cholesterol'] = cholesterol?.cholesterol ?? '';
-      }));
+          });
+
+          i['heartRateIndicator'] = heartbeat?.heartRateIndicator ?? '';
+
+          const glucose = await this.prismaService.glucose.findFirst({
+            where: {
+              healthRecordId: healthRecord.id,
+              createdAt: {
+                gte: i?.createdAt,
+                lte: i?.createdAt,
+              },
+            },
+            select: {
+              glucose: true,
+            },
+          });
+
+          i['glucose'] = glucose?.glucose ?? '';
+
+          const cholesterol = await this.prismaService.cholesterol.findFirst({
+            where: {
+              healthRecordId: healthRecord.id,
+              createdAt: {
+                gte: i?.createdAt,
+                lte: i?.createdAt,
+              },
+            },
+            select: {
+              cholesterol: true,
+            },
+          });
+
+          i['cholesterol'] = cholesterol?.cholesterol ?? '';
+        }),
+      );
 
       // const bloodPressure = await this.prismaService.bloodPressure.findFirst({
       //   where: {
@@ -126,8 +128,6 @@ export class HealthRecordService {
       // });
       // data['systolic'] = bloodPressure?.systolic ?? '';
       // data['diastolic'] = bloodPressure?.diastolic ?? '';
-
-      
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
         pagination: !dto?.isAll ? pagination : undefined,
@@ -420,7 +420,7 @@ export class HealthRecordService {
         },
       });
 
-      data['heartbeat'] = heartbeat?.heartRateIndicator ?? '';
+      data['heartRateIndicator'] = heartbeat?.heartRateIndicator ?? '';
 
       const bloodPressure = await this.prismaService.bloodPressure.findFirst({
         where: {
