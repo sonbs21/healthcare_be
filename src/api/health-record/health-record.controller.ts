@@ -51,6 +51,12 @@ export class HealthRecordController {
     return this.healthRecordService.create(user['memberId'], dto);
   }
 
+  @Post('emergency')
+  @HttpCode(HttpStatus.OK)
+  emergency(@CurrentUser() user) {
+    return this.healthRecordService.emergency(user['memberId']);
+  }
+
   @Get('health-record-day')
   @HttpCode(HttpStatus.OK)
   findHealthRecordDay(@CurrentUser() user) {

@@ -1,16 +1,34 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, TypeNotification } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
-import { cleanup, funcIndexBmi, MESS_CODE, t } from '@utils';
+import {
+  cleanup,
+  funcIndexBmi,
+  MESS_CODE,
+  recordBloodPressure,
+  recordCholesterol,
+  recordIndexBmi,
+  recordGlucose,
+  recordHeartBeat,
+  t,
+} from '@utils';
 import * as moment from 'moment';
 import { FilterHealthRecordDto } from './dto';
 import { CreateHealthRecordDto } from './dto/create-health-record.dto';
+import axios, { Axios } from 'axios';
+import { SocketGateWayService } from '@api/socket-io/socket-io.service';
 
 @Injectable()
 export class HealthRecordService {
-  constructor(private prismaService: PrismaService) {}
+  private client: Axios;
+
+  constructor(private prismaService: PrismaService, private socketsService: SocketGateWayService) {
+    this.client = axios.create({
+      baseURL: process.env.GGMAP_URL,
+    });
+  }
 
   async findHealthRecordWithId(memberId: string, dto: FilterHealthRecordDto, pagination: Pagination) {
     try {
@@ -200,14 +218,28 @@ export class HealthRecordService {
       if (!Number(heartRateIndicator) && Number(heartRateIndicator) <= 0)
         throw new BadRequestException(t(MESS_CODE['INVALID_HEARTBEAT']));
 
-      const heathRecord = await this.prismaService.healthRecord.findFirst({
-        where: { patientId: memberId },
-        select: { id: true },
+      // const heathRecord = await this.prismaService.healthRecord.findFirst({
+      //   where: { patientId: memberId },
+      //   select: { id: true },
+      // });
+
+      const patient = await this.prismaService.patient.findFirst({
+        where: { id: memberId },
+        select: {
+          id: true,
+          fullName: true,
+          doctorId: true,
+          healthRecord: {
+            select: {
+              id: true,
+            },
+          },
+        },
       });
 
       const bmiExist = await this.prismaService.bmi.findFirst({
         where: {
-          healthRecordId: heathRecord.id,
+          healthRecordId: patient.healthRecord.id,
           createdAt: {
             gte: moment().startOf('D').toISOString(),
             lte: moment().endOf('D').toISOString(),
@@ -217,7 +249,7 @@ export class HealthRecordService {
 
       const cholesterolExist = await this.prismaService.cholesterol.findFirst({
         where: {
-          healthRecordId: heathRecord.id,
+          healthRecordId: patient.healthRecord.id,
           createdAt: {
             gte: moment().startOf('D').toISOString(),
             lte: moment().endOf('D').toISOString(),
@@ -227,7 +259,7 @@ export class HealthRecordService {
 
       const heartbeatExist = await this.prismaService.heartbeat.findFirst({
         where: {
-          healthRecordId: heathRecord.id,
+          healthRecordId: patient.healthRecord.id,
           createdAt: {
             gte: moment().startOf('D').toISOString(),
             lte: moment().endOf('D').toISOString(),
@@ -237,7 +269,7 @@ export class HealthRecordService {
 
       const glucoseExist = await this.prismaService.glucose.findFirst({
         where: {
-          healthRecordId: heathRecord.id,
+          healthRecordId: patient.healthRecord.id,
           createdAt: {
             gte: moment().startOf('D').toISOString(),
             lte: moment().endOf('D').toISOString(),
@@ -247,7 +279,7 @@ export class HealthRecordService {
 
       const bloodPressureExist = await this.prismaService.bloodPressure.findFirst({
         where: {
-          healthRecordId: heathRecord.id,
+          healthRecordId: patient.healthRecord.id,
           createdAt: {
             gte: moment().startOf('D').toISOString(),
             lte: moment().endOf('D').toISOString(),
@@ -259,7 +291,7 @@ export class HealthRecordService {
         if (!bmiExist) {
           await prisma.bmi.create({
             data: {
-              healthRecordId: heathRecord.id,
+              healthRecordId: patient.healthRecord.id,
               height,
               weight,
               indexBmi: `${indexBmi.toFixed(2)}`,
@@ -284,7 +316,7 @@ export class HealthRecordService {
         if (!cholesterolExist) {
           await prisma.cholesterol.create({
             data: {
-              healthRecordId: heathRecord.id,
+              healthRecordId: patient.healthRecord.id,
               cholesterol,
               createdBy: memberId,
             },
@@ -304,7 +336,7 @@ export class HealthRecordService {
         if (!glucoseExist) {
           await prisma.glucose.create({
             data: {
-              healthRecordId: heathRecord.id,
+              healthRecordId: patient.healthRecord.id,
               glucose,
               createdBy: memberId,
             },
@@ -324,7 +356,7 @@ export class HealthRecordService {
         if (!heartbeatExist) {
           await prisma.heartbeat.create({
             data: {
-              healthRecordId: heathRecord.id,
+              healthRecordId: patient.healthRecord.id,
               heartRateIndicator,
               createdBy: memberId,
             },
@@ -344,7 +376,7 @@ export class HealthRecordService {
         if (!bloodPressureExist) {
           await prisma.bloodPressure.create({
             data: {
-              healthRecordId: heathRecord.id,
+              healthRecordId: patient.healthRecord.id,
               systolic,
               diastolic,
               createdBy: memberId,
@@ -363,9 +395,171 @@ export class HealthRecordService {
           });
         }
       });
-      return ResponseSuccess({}, MESS_CODE['SUCCESS'], {});
+
+      const data = {};
+
+      const bmi = await this.prismaService.bmi.findFirst({
+        where: {
+          healthRecordId: patient.healthRecord.id,
+          createdAt: {
+            gte: moment().startOf('D').toISOString(),
+            lte: moment().endOf('D').toISOString(),
+          },
+        },
+        select: {
+          createdAt: true,
+          indexBmi: true,
+        },
+      });
+      const rcBmi = recordIndexBmi(indexBmi);
+
+      let checkBmi = false;
+      let checkGlucose = false;
+      let checkCholesterol = false;
+      let checkBloodPressure = false;
+      let checkHeartbeat = false;
+
+      data['healthRecordId'] = patient.healthRecord.id;
+      data['createdAt'] = bmi.createdAt;
+      data['indexBmi'] = bmi.indexBmi;
+      data['recordBmi'] = rcBmi;
+      if (rcBmi.status === 'LIGHT' || rcBmi.status === 'FAT') checkBmi = true;
+
+      const cholesterolIdx = await this.prismaService.cholesterol.findFirst({
+        where: {
+          healthRecordId: patient.healthRecord.id,
+          createdAt: {
+            gte: moment().startOf('D').toISOString(),
+            lte: moment().endOf('D').toISOString(),
+          },
+        },
+        select: {
+          cholesterol: true,
+        },
+      });
+      const rcCholesterol = recordCholesterol(cholesterol);
+      data['cholesterol'] = cholesterolIdx.cholesterol;
+      data['recordCholesterol'] = rcCholesterol;
+      if (rcCholesterol.status === 'CRITIAL') checkCholesterol = true;
+
+      const heartbeat = await this.prismaService.heartbeat.findFirst({
+        where: {
+          healthRecordId: patient.healthRecord.id,
+          createdAt: {
+            gte: moment().startOf('D').toISOString(),
+            lte: moment().endOf('D').toISOString(),
+          },
+        },
+        select: {
+          heartRateIndicator: true,
+        },
+      });
+      const rcHeartBeat = recordHeartBeat(heartRateIndicator);
+      data['heartRateIndicator'] = heartbeat.heartRateIndicator;
+      data['recordHeartBeat'] = rcHeartBeat;
+      if (rcHeartBeat.status === 'CRITIAL') checkHeartbeat = true;
+
+      const glucoseIdx = await this.prismaService.glucose.findFirst({
+        where: {
+          healthRecordId: patient.healthRecord.id,
+          createdAt: {
+            gte: moment().startOf('D').toISOString(),
+            lte: moment().endOf('D').toISOString(),
+          },
+        },
+        select: {
+          glucose: true,
+        },
+      });
+      const rcGlucose = recordGlucose(glucose);
+      data['glucose'] = glucoseIdx.glucose;
+      data['recordGlucose'] = rcGlucose;
+      if (rcGlucose.status === 'CRITIAL') checkGlucose = true;
+
+      const bloodPressure = await this.prismaService.bloodPressure.findFirst({
+        where: {
+          healthRecordId: patient.healthRecord.id,
+          createdAt: {
+            gte: moment().startOf('D').toISOString(),
+            lte: moment().endOf('D').toISOString(),
+          },
+        },
+        select: {
+          systolic: true,
+          diastolic: true,
+        },
+      });
+      const rcBloodPressure = recordBloodPressure(systolic, diastolic);
+      data['systolic'] = bloodPressure.systolic;
+      data['diastolic'] = bloodPressure.diastolic;
+      data['recordBloodPressure'] = rcBloodPressure;
+      if (rcBloodPressure.status === 'LOW' || rcBloodPressure.status === 'HIGH') checkBloodPressure = true;
+
+      let str = '';
+      if (checkBmi) str += 'BMI, ';
+      if (checkBloodPressure) str += 'nhịp tim, ';
+      if (checkCholesterol) str += 'cholesterol, ';
+      if (checkGlucose) str += 'glucose, ';
+      if (checkHeartbeat) str += 'nhịp tim, ';
+
+      const dateTime = moment(data['createdAt']).format('DD/MM/YYY');
+
+      const notification = await this.prismaService.notification.create({
+        data: {
+          title: 'Cảnh báo',
+          content: `Chỉ số ${str} trong báo cáo sức khỏe ngày ${dateTime} của bệnh nhân ${patient.fullName} trong tình trạng cảnh báo`,
+          typeNotification: TypeNotification.WARNING,
+          isRead: false,
+          userId: patient.doctorId,
+        },
+      });
+
+      await this.socketsService.newNotification({
+        notificationId: notification.id,
+        data: notification,
+      });
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       throw new BadRequestException(err.message);
+    }
+  }
+
+  async emergency(memberId: string) {
+    try {
+      const response = await this.client.post(
+        'https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBRm7R6WMe0kidaFKn7LB4V_W3lvX-Ft4w',
+      );
+      const lat = response.data.location.lat;
+      const lng = response.data.location.lng;
+
+      const patient = await this.prismaService.patient.findFirst({
+        where: {
+          id: memberId,
+        },
+        select: {
+          fullName: true,
+          doctorId: true,
+        },
+      });
+
+      const notification = await this.prismaService.notification.create({
+        data: {
+          title: 'Cấp cứu',
+          content: `Bệnh nhân ${patient.fullName} đã gửi yêu cầu cấp cứu`,
+          typeNotification: TypeNotification.EMERGENCY,
+          url: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
+          isRead: false,
+          userId: patient.doctorId,
+        },
+      });
+
+      await this.socketsService.newNotification({
+        notificationId: notification.id,
+        data: notification,
+      });
+    } catch (error) {
+      console.log('error', error.message);
     }
   }
 

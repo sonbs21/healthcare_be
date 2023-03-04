@@ -47,6 +47,7 @@ enum TypeNotification {
   WARNING
   SYSTEM
   APPOINTMENT
+  EMERGENCY
 }
 
 enum Status {
@@ -131,7 +132,7 @@ model Patient {
 
   user         User?         @relation("user_patient")
   doctor       Doctor?       @relation("doctor_patient", fields: [doctorId], references: [id])
-  healRecord   HealthRecord? @relation("health_record_patient")
+  healthRecord HealthRecord? @relation("health_record_patient")
   carer        Carer[]       @relation("patient_carer")
   appointments Appointment[] @relation("patient_appointments")
 }
@@ -155,7 +156,7 @@ model Carer {
 
 model Conversation {
   id               String            @id @default(cuid()) @db.VarChar(32)
-  avatar           String?           @db.Text
+  avatar           String?           @db.Text()
   typeConversation TypeConversation? @default(SINGLE)
 
   leaderId String? @db.VarChar(32)
@@ -195,6 +196,7 @@ model Notification {
   title            String?           @db.VarChar(255)
   typeNotification TypeNotification? @default(SYSTEM)
   content          String?           @db.VarChar(255)
+  url              String?           @db.Text()
   isRead           Boolean?          @default(false) @db.TinyInt()
 
   userId String? @db.VarChar(32)
