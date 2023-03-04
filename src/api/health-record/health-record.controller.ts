@@ -39,10 +39,10 @@ export class HealthRecordController {
     return this.healthRecordService.findAll(dto, pagination);
   }
 
-  @Get('health-record/:id')
+  @Get('health-record')
   @HttpCode(HttpStatus.OK)
-  findOne(@Param('id') id: string) {
-    return this.healthRecordService.findOne(id);
+  findOne(@CurrentUser() user) {
+    return this.healthRecordService.findOne(user['memberId']);
   }
 
   @Post('health-record')
