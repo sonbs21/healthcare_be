@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma, TypeNotification } from '@prisma/client';
+import { Prisma, Status, TypeNotification } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
 import {
@@ -218,11 +218,6 @@ export class HealthRecordService {
       if (!Number(heartRateIndicator) && Number(heartRateIndicator) <= 0)
         throw new BadRequestException(t(MESS_CODE['INVALID_HEARTBEAT']));
 
-      // const heathRecord = await this.prismaService.healthRecord.findFirst({
-      //   where: { patientId: memberId },
-      //   select: { id: true },
-      // });
-
       const patient = await this.prismaService.patient.findFirst({
         where: { id: memberId },
         select: {
@@ -397,6 +392,12 @@ export class HealthRecordService {
       });
 
       const data = {};
+      let checkBmi = false;
+      let checkGlucose = false;
+      let checkCholesterol = false;
+      let checkBloodPressure = false;
+      let checkHeartbeat = false;
+      let num = 0;
 
       const bmi = await this.prismaService.bmi.findFirst({
         where: {
@@ -413,17 +414,14 @@ export class HealthRecordService {
       });
       const rcBmi = recordIndexBmi(indexBmi);
 
-      let checkBmi = false;
-      let checkGlucose = false;
-      let checkCholesterol = false;
-      let checkBloodPressure = false;
-      let checkHeartbeat = false;
-
       data['healthRecordId'] = patient.healthRecord.id;
       data['createdAt'] = bmi.createdAt;
       data['indexBmi'] = bmi.indexBmi;
       data['recordBmi'] = rcBmi;
-      if (rcBmi.status === 'LIGHT' || rcBmi.status === 'FAT') checkBmi = true;
+      if (rcBmi.status === 'LIGHT' || rcBmi.status === 'FAT') {
+        checkBmi = true;
+        num += 1;
+      }
 
       const cholesterolIdx = await this.prismaService.cholesterol.findFirst({
         where: {
@@ -440,7 +438,11 @@ export class HealthRecordService {
       const rcCholesterol = recordCholesterol(cholesterol);
       data['cholesterol'] = cholesterolIdx.cholesterol;
       data['recordCholesterol'] = rcCholesterol;
-      if (rcCholesterol.status === 'CRITIAL') checkCholesterol = true;
+
+      if (rcCholesterol.status === 'CRITIAL') {
+        checkCholesterol = true;
+        num += 1;
+      }
 
       const heartbeat = await this.prismaService.heartbeat.findFirst({
         where: {
@@ -457,7 +459,10 @@ export class HealthRecordService {
       const rcHeartBeat = recordHeartBeat(heartRateIndicator);
       data['heartRateIndicator'] = heartbeat.heartRateIndicator;
       data['recordHeartBeat'] = rcHeartBeat;
-      if (rcHeartBeat.status === 'CRITIAL') checkHeartbeat = true;
+      if (rcHeartBeat.status === 'CRITIAL') {
+        checkHeartbeat = true;
+        num += 1;
+      }
 
       const glucoseIdx = await this.prismaService.glucose.findFirst({
         where: {
@@ -474,7 +479,10 @@ export class HealthRecordService {
       const rcGlucose = recordGlucose(glucose);
       data['glucose'] = glucoseIdx.glucose;
       data['recordGlucose'] = rcGlucose;
-      if (rcGlucose.status === 'CRITIAL') checkGlucose = true;
+      if (rcGlucose.status === 'CRITIAL') {
+        checkGlucose = true;
+        num += 1;
+      }
 
       const bloodPressure = await this.prismaService.bloodPressure.findFirst({
         where: {
@@ -493,7 +501,10 @@ export class HealthRecordService {
       data['systolic'] = bloodPressure.systolic;
       data['diastolic'] = bloodPressure.diastolic;
       data['recordBloodPressure'] = rcBloodPressure;
-      if (rcBloodPressure.status === 'LOW' || rcBloodPressure.status === 'HIGH') checkBloodPressure = true;
+      if (rcBloodPressure.status === 'LOW' || rcBloodPressure.status === 'HIGH') {
+        checkBloodPressure = true;
+        num += 1;
+      }
 
       let str = '';
       if (checkBmi) str += 'BMI, ';
@@ -503,6 +514,24 @@ export class HealthRecordService {
       if (checkHeartbeat) str += 'nhịp tim, ';
 
       const dateTime = moment(data['createdAt']).format('DD/MM/YYY');
+
+      let healthRecordStatus: Status = Status.SAFE;
+      if (num >= 2 && num < 4) {
+        healthRecordStatus = Status.DANGER;
+      } else if (num >= 4) {
+        healthRecordStatus = Status.CRITIAL;
+      }
+
+      const healthRecord = await this.prismaService.healthRecord.update({
+        where: {
+          id: patient.healthRecord.id,
+        },
+        data: {
+          status: healthRecordStatus,
+        },
+      });
+
+      data['status'] = healthRecord.status;
 
       const notification = await this.prismaService.notification.create({
         data: {
