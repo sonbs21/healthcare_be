@@ -558,6 +558,7 @@ export class HealthRecordService {
         notificationId: notification.id,
         data: notification,
       });
+      return ResponseSuccess({}, MESS_CODE['SUCCESS'], {});
     } catch (error) {
       console.log('error', error.message);
     }

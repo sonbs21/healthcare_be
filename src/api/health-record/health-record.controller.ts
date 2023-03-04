@@ -35,7 +35,7 @@ export class HealthRecordController {
 
   @Get('health-records')
   @HttpCode(HttpStatus.OK)
-  findAll(@Query() dto: FilterHealthRecordDto, @Paginate() pagination: Pagination, @Headers() header) {
+  findAll(@Query() dto: FilterHealthRecordDto, @Paginate() pagination: Pagination) {
     return this.healthRecordService.findAll(dto, pagination);
   }
 
