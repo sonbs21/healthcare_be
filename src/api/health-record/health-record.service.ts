@@ -490,7 +490,7 @@ export class HealthRecordService {
 
       let str = '';
       if (checkBmi) str += 'BMI, ';
-      if (checkBloodPressure) str += 'nhịp tim, ';
+      if (checkBloodPressure) str += 'huyết áp, ';
       if (checkCholesterol) str += 'cholesterol, ';
       if (checkGlucose) str += 'glucose, ';
       if (checkHeartbeat) str += 'nhịp tim, ';

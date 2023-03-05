@@ -8,6 +8,7 @@ export const notificationsSelect: Prisma.NotificationSelect = {
   createdAt: true,
   // images: { select: { url: true } },
   title: true,
+  url: true,
   content: true,
 };
 
@@ -17,5 +18,6 @@ export const notificationSelect: Prisma.NotificationSelect = {
   isRead: true,
   createdAt: true,
   content: true,
+  url: true,
   // images: { select: { url: true } },
 };
