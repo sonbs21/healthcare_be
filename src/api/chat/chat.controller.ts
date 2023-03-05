@@ -36,16 +36,4 @@ export class ChatController {
   postMessage(@CurrentUser() user, @Param('id') id: string, dto: PostMessageDto) {
     return this.chatService.postMessage(user['memberId'], id, dto);
   }
-
-  // @Patch('feature/:id')
-  // @HttpCode(HttpStatus.OK)
-  // update(@CurrentUser() user, @Param('id') id: string, @Body() dto: UpdateFeatureDto, @Headers() header) {
-  //   return this.featuresService.update(user['id'], id, dto, header['language']);
-  // }
-
-  // @Delete('feature/:id')
-  // @HttpCode(HttpStatus.OK)
-  // remove(@CurrentUser() user, @Param('id') id: string, @Headers() header) {
-  //   return this.featuresService.remove(user['id'], id, header['language']);
-  // }
 }

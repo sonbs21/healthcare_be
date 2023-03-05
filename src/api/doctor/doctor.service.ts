@@ -183,7 +183,6 @@ export class DoctorService {
         this.prismaService.bloodPressure.findMany({
           where: { healthRecordId: healthRecord.id },
           select: {
-            id: true,
             createdAt: true,
             healthRecordId: true,
             systolic: true,

@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+import { FilterHealthRecordDto } from '@api/doctor/dto';
 import { JwtAuthGuard } from '@auth/guards';
 import { CurrentUser, Paginate } from '@decorators';
 import {
@@ -48,6 +49,12 @@ export class HeartbeatController {
   @HttpCode(HttpStatus.OK)
   getHeartbeat(@CurrentUser() user, @Query() dto: FilterHeartbeatGetMemberDto, @Paginate() pagination: Pagination) {
     return this.heartbeatService.getHeartbeat(user['memberId'], dto, pagination);
+  }
+
+  @Get('get-heartbeat-doctor')
+  @HttpCode(HttpStatus.OK)
+  getHeartbeatForDoctor(@Query() dto: FilterHealthRecordDto, @Paginate() pagination: Pagination) {
+    return this.heartbeatService.getHeartbeatForDoctor(dto, pagination);
   }
 
   @Patch('heartbeat/:id')

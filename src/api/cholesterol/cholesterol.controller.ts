@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+import { FilterHealthRecordDto } from '@api/doctor/dto';
 import { JwtAuthGuard } from '@auth/guards';
 import { CurrentUser, Paginate } from '@decorators';
 import {
@@ -42,6 +43,12 @@ export class CholesterolController {
   @HttpCode(HttpStatus.OK)
   getCholesterol(@CurrentUser() user, @Query() dto: FilterCholesterolGetMemberDto, @Paginate() pagination: Pagination) {
     return this.cholesterolService.getCholesterol(user['memberId'], dto, pagination);
+  }
+
+  @Get('get-cholesterol-doctor')
+  @HttpCode(HttpStatus.OK)
+  getCholesterolForDoctor(@Query() dto: FilterHealthRecordDto, @Paginate() pagination: Pagination) {
+    return this.cholesterolService.getCholesterolForDoctor(dto, pagination);
   }
 
   @Post('cholesterol')

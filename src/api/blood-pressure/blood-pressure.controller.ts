@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+import { FilterHealthRecordDto } from '@api/doctor/dto';
 import { JwtAuthGuard } from '@auth/guards';
 import { CurrentUser, Paginate } from '@decorators';
 import {
@@ -52,6 +53,12 @@ export class BloodPressureController {
     @Paginate() pagination: Pagination,
   ) {
     return this.bloodPressureService.getBloodPressure(user['memberId'], dto, pagination);
+  }
+
+  @Get('get-blood-pressure-doctor')
+  @HttpCode(HttpStatus.OK)
+  getBloodPressureForDoctor(@Query() dto: FilterHealthRecordDto, @Paginate() pagination: Pagination) {
+    return this.bloodPressureService.getBloodPressureForDoctor(dto, pagination);
   }
 
   @Post('blood-pressure')

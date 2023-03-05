@@ -41,16 +41,4 @@ export class ConversationController {
   findOne(@Param('id') id: string, @Headers() header) {
     return this.conversationService.findOne(id);
   }
-
-  // @Patch('feature/:id')
-  // @HttpCode(HttpStatus.OK)
-  // update(@CurrentUser() user, @Param('id') id: string, @Body() dto: UpdateFeatureDto, @Headers() header) {
-  //   return this.featuresService.update(user['id'], id, dto, header['language']);
-  // }
-
-  // @Delete('feature/:id')
-  // @HttpCode(HttpStatus.OK)
-  // remove(@CurrentUser() user, @Param('id') id: string, @Headers() header) {
-  //   return this.featuresService.remove(user['id'], id, header['language']);
-  // }
 }

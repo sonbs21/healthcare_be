@@ -70,9 +70,6 @@ export class AppointmentService {
 
   async findOne(id: string) {
     try {
-      // const exist = await this.checkAppointmentExist({ id });
-      // if (!exist) throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
-
       const data = await this.prismaService.appointment.findFirst({
         where: {
           id,
@@ -388,7 +385,6 @@ export class AppointmentService {
         },
         data: {
           statusAppointment: StatusAppointment.REFUSED,
-          // reason: dto.reason,
           updatedBy: memberId,
         },
       });
@@ -458,7 +454,6 @@ export class AppointmentService {
         },
         data: {
           statusAppointment: StatusAppointment.CANCELED,
-          // reason: dto.reason,
           updatedBy: memberId,
         },
       });

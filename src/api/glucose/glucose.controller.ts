@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+import { FilterHealthRecordDto } from '@api/doctor/dto';
 import { JwtAuthGuard } from '@auth/guards';
 import { CurrentUser, Paginate } from '@decorators';
 import {
@@ -42,6 +43,12 @@ export class GlucoseController {
   @HttpCode(HttpStatus.OK)
   getGlucose(@CurrentUser() user, @Query() dto: FilterGlucoseGetMemberDto, @Paginate() pagination: Pagination) {
     return this.glucoseService.getGlucose(user['memberId'], dto, pagination);
+  }
+
+  @Get('get-glucose-doctor')
+  @HttpCode(HttpStatus.OK)
+  getGlucoseForDoctor(@Query() dto: FilterHealthRecordDto, @Paginate() pagination: Pagination) {
+    return this.glucoseService.getGlucoseForDoctor(dto, pagination);
   }
 
   @Post('glucose')

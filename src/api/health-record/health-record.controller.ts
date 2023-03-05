@@ -1,17 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { JwtAuthGuard } from '@auth/guards';
 import { CurrentUser, Paginate } from '@decorators';
-import {
-  Body,
-  Controller,
-  Get, HttpCode,
-  HttpStatus,
-  Param,
-  Patch,
-  Post,
-  Query,
-  UseGuards
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { FilterHealthRecordDto } from './dto';
@@ -66,16 +56,4 @@ export class HealthRecordController {
   update(@CurrentUser() user, @Param('id') id: string, @Body() dto: CreateHealthRecordDto) {
     return this.healthRecordService.create(user['memberId'], dto);
   }
-
-  // @Patch('feature/:id')
-  // @HttpCode(HttpStatus.OK)
-  // update(@CurrentUser() user, @Param('id') id: string, @Body() dto: UpdateFeatureDto, @Headers() header) {
-  //   return this.featuresService.update(user['id'], id, dto, header['language']);
-  // }
-
-  // @Delete('feature/:id')
-  // @HttpCode(HttpStatus.OK)
-  // remove(@CurrentUser() user, @Param('id') id: string, @Headers() header) {
-  //   return this.featuresService.remove(user['id'], id, header['language']);
-  // }
 }

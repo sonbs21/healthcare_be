@@ -130,9 +130,6 @@ export class CarerService {
   async update(memberId: string, id: string, dto: UpdateCarerDto) {
     try {
       const { fullName, phone } = dto;
-      // if (Number(cholesterol) < 0) {
-      //   throw new BadRequestException(t(MESS_CODE['INVALID_HEIGHT']));
-      // }
       const exist = await this.checkCarerExist({ id });
       if (!exist) throw new BadRequestException(t(MESS_CODE['BMI_NOT_FOUND'], {}));
 

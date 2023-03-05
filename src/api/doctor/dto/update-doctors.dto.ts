@@ -1,20 +1,8 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
-import {
-
-  IsOptional,
-  IsString,
-  MinLength,
-} from 'class-validator';
-
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsOptional, IsString, MinLength } from 'class-validator';
 
 export class UpdateDoctorDto {
-  // @IsString()
-  // @IsOptional()
-  // @MinLength(1)
-  // @ApiPropertyOptional({ example: '' })
-  // code: string;
-
   @IsString()
   @Transform(({ obj, key }) => obj[key]?.trim())
   @IsOptional()

@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+import { FilterHealthRecordDto } from '@api/doctor/dto';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@services';
@@ -108,6 +109,43 @@ export class BmiService {
         select: { id: true },
       });
 
+      const [total, data] = await this.prismaService.$transaction([
+        this.prismaService.bmi.count({ where: { healthRecordId: healthRecord.id } }),
+        this.prismaService.bmi.findMany({
+          where: { healthRecordId: healthRecord.id },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          select: {
+            id: true,
+            healthRecordId: true,
+            height: true,
+            weight: true,
+            indexBmi: true,
+            createdAt: true,
+            createdBy: true,
+          },
+          skip: !dto?.isAll ? skip : undefined,
+          take: !dto?.isAll ? take : undefined,
+        }),
+      ]);
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
+        pagination: !dto?.isAll ? pagination : undefined,
+        total,
+      });
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  async getBmiForDoctor(dto: FilterHealthRecordDto, pagination: Pagination) {
+    try {
+      const { skip, take } = pagination;
+      const healthRecord = await this.prismaService.healthRecord.findFirst({
+        where: { patientId: dto.patientId },
+        select: { id: true },
+      });
 
       const [total, data] = await this.prismaService.$transaction([
         this.prismaService.bmi.count({ where: { healthRecordId: healthRecord.id } }),

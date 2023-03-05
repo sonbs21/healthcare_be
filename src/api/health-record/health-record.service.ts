@@ -173,9 +173,6 @@ export class HealthRecordService {
 
   async findOne(memberId: string) {
     try {
-      // const exist = await this.checkFeatureExist({ id });
-      // if (!exist) throw new BadRequestException(t(MESS_CODE['FEATURE_NOT_FOUND'], language));
-
       const data = await this.prismaService.healthRecord.findFirst({
         where: {
           patientId: memberId,

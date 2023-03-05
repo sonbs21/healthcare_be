@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+import { FilterHealthRecordDto } from '@api/doctor/dto';
 import { JwtAuthGuard } from '@auth/guards';
 import { CurrentUser, Paginate } from '@decorators';
 import {
@@ -43,6 +44,12 @@ export class BmiController {
   @HttpCode(HttpStatus.OK)
   getBmi(@CurrentUser() user, @Query() dto: FilterBmiGetMemberDto, @Paginate() pagination: Pagination) {
     return this.bmiService.getBmi(user['memberId'], dto, pagination);
+  }
+
+  @Get('get-bmi-doctor')
+  @HttpCode(HttpStatus.OK)
+  getBmiForDoctor(@Query() dto: FilterHealthRecordDto, @Paginate() pagination: Pagination) {
+    return this.bmiService.getBmiForDoctor(dto, pagination);
   }
 
   @Post('bmi')
