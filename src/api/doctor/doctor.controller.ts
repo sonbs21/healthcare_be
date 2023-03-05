@@ -5,7 +5,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Query, UseGu
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { DoctorService } from './doctor.service';
-import { FilterDoctorsDto, FilterPatientsWithDoctorIdDto, UpdateDoctorDto } from './dto';
+import { FilterDoctorsDto, FilterHealthRecordDto, FilterPatientsWithDoctorIdDto, UpdateDoctorDto } from './dto';
 
 @Controller('v1')
 @ApiTags('Doctors')
@@ -19,11 +19,22 @@ export class DoctorController {
   findAll(@Query() dto: FilterDoctorsDto, @Paginate() pagination: Pagination) {
     return this.doctorService.findAll(dto, pagination);
   }
+
   @Get('doctor/patients')
   @HttpCode(HttpStatus.OK)
   getAllPatient(@CurrentUser() user, @Query() dto: FilterPatientsWithDoctorIdDto, @Paginate() pagination: Pagination) {
     return this.doctorService.getAllPatient(user['memberId'], dto, pagination);
   }
+
+  @Get('doctor/health-record-patient')
+  @HttpCode(HttpStatus.OK)
+  getAllRecordPatient(
+    @Query() dto: FilterHealthRecordDto,
+    @Paginate() pagination: Pagination,
+  ) {
+    return this.doctorService.getAllHealthRecordPatient(dto, pagination);
+  }
+
   @Get('doctor/:id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {

@@ -7,10 +7,8 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination } from '@types';
 import { cleanup } from '@utils';
-import * as _ from 'lodash';
-import * as moment from 'moment';
 import { doctorsSelect } from './conditions';
-import { FilterDoctorsDto, FilterPatientsWithDoctorIdDto, UpdateDoctorDto } from './dto';
+import { FilterDoctorsDto, FilterHealthRecordDto, FilterPatientsWithDoctorIdDto, UpdateDoctorDto } from './dto';
 
 @Injectable()
 export class DoctorService {
@@ -111,7 +109,6 @@ export class DoctorService {
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
-
       throw new BadRequestException(err.message);
     }
   }
@@ -164,6 +161,111 @@ export class DoctorService {
           },
         }),
       ]);
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
+        pagination: !dto?.isAll ? pagination : undefined,
+        total,
+      });
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  async getAllHealthRecordPatient(dto: FilterHealthRecordDto, pagination: Pagination) {
+    try {
+      const { skip, take } = pagination;
+      const healthRecord = await this.prismaService.healthRecord.findFirst({
+        where: { patientId: dto.patientId },
+      });
+
+      const [total, data] = await this.prismaService.$transaction([
+        this.prismaService.bloodPressure.count({ where: { healthRecordId: healthRecord.id } }),
+        this.prismaService.bloodPressure.findMany({
+          where: { healthRecordId: healthRecord.id },
+          select: {
+            id: true,
+            createdAt: true,
+            healthRecordId: true,
+            systolic: true,
+            diastolic: true,
+            // type
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          skip: !dto?.isAll ? skip : undefined,
+          take: !dto?.isAll ? take : undefined,
+        }),
+      ]);
+
+      await Promise.all(
+        data.map(async (i) => {
+          const bmi = await this.prismaService.bmi.findFirst({
+            where: {
+              healthRecordId: healthRecord.id,
+              createdAt: {
+                gte: i?.createdAt,
+                lte: i?.createdAt,
+              },
+            },
+            select: {
+              height: true,
+              weight: true,
+              indexBmi: true,
+              createdAt: true,
+            },
+          });
+
+          i['height'] = bmi?.height ?? '';
+          i['weight'] = bmi?.weight ?? '';
+          i['indexBmi'] = bmi?.indexBmi ?? '';
+
+          const heartbeat = await this.prismaService.heartbeat.findFirst({
+            where: {
+              healthRecordId: healthRecord.id,
+              createdAt: {
+                gte: i?.createdAt,
+                lte: i?.createdAt,
+              },
+            },
+            select: {
+              heartRateIndicator: true,
+            },
+          });
+
+          i['heartRateIndicator'] = heartbeat?.heartRateIndicator ?? '';
+
+          const glucose = await this.prismaService.glucose.findFirst({
+            where: {
+              healthRecordId: healthRecord.id,
+              createdAt: {
+                gte: i?.createdAt,
+                lte: i?.createdAt,
+              },
+            },
+            select: {
+              glucose: true,
+            },
+          });
+
+          i['glucose'] = glucose?.glucose ?? '';
+
+          const cholesterol = await this.prismaService.cholesterol.findFirst({
+            where: {
+              healthRecordId: healthRecord.id,
+              createdAt: {
+                gte: i?.createdAt,
+                lte: i?.createdAt,
+              },
+            },
+            select: {
+              cholesterol: true,
+            },
+          });
+
+          i['cholesterol'] = cholesterol?.cholesterol ?? '';
+        }),
+      );
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
         pagination: !dto?.isAll ? pagination : undefined,

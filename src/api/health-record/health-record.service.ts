@@ -131,22 +131,6 @@ export class HealthRecordService {
         }),
       );
 
-      // const bloodPressure = await this.prismaService.bloodPressure.findFirst({
-      //   where: {
-      //     healthRecordId: healthRecord.id,
-      //     createdAt: {
-      //       gte: moment().startOf('D').toISOString(),
-      //       lte: moment().endOf('D').toISOString(),
-      //     },
-      //   },
-      //   select: {
-      //     systolic: true,
-      //     diastolic: true,
-      //   },
-      // });
-      // data['systolic'] = bloodPressure?.systolic ?? '';
-      // data['diastolic'] = bloodPressure?.diastolic ?? '';
-
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
         pagination: !dto?.isAll ? pagination : undefined,
         total,

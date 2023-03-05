@@ -4,15 +4,13 @@ import { CurrentUser, Paginate } from '@decorators';
 import {
   Body,
   Controller,
-  Get,
-  Headers,
-  HttpCode,
+  Get, HttpCode,
   HttpStatus,
   Param,
   Patch,
   Post,
   Query,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
