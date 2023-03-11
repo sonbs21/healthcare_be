@@ -12,39 +12,130 @@ export class ChatService {
 
   async getMessage(id: string, dto: FilterChatDto, pagination: Pagination) {
     try {
-      const { skip, take } = pagination;
       // const exist = await this.checkFeatureExist({ id });
       // if (!exist) throw new BadRequestException(t(MESS_CODE['FEATURE_NOT_FOUND'], language));
+      const { skip, take } = pagination;
 
-      const [total, data] = await this.prismaService.$transaction([
-        this.prismaService.message.count({ where: { conversationId: id } }),
-        this.prismaService.message.findMany({
-          where: {
-            conversationId: id,
-          },
-          select: {
-            id: true,
-            // typeMessage: true,
-            content: true,
-            attachments: true,
-            createdAt: true,
-            createdBy: true,
-          },
-          orderBy: {
-            createdAt: 'desc',
-          },
-          skip: !dto?.isAll ? skip : undefined,
-          take: !dto?.isAll ? take : undefined,
-        }),
-      ]);
-
-      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
-        pagination: !dto?.isAll ? pagination : undefined,
-        total,
+      const data = await this.prismaService.message.findMany({
+        where: {
+          conversationId: id,
+          isDeleted: false,
+        },
+        select: {
+          content: true,
+          createdAt: true,
+          createdBy: true,
+        },
+        skip: !dto?.isAll ? skip : undefined,
+        take: !dto?.isAll ? take : undefined,
       });
+
+      const newData = await Promise.all(
+        data.map(async (item) => {
+          const user = await this.prismaService.user.findFirst({
+            where: {
+              memberId: item.createdBy,
+            },
+            include: {
+              doctor: true,
+              patient: true,
+            },
+          });
+          if (user.doctor) {
+            item['user'] = user.doctor;
+          }
+
+          if (user.patient) {
+            item['user'] = user.patient;
+          }
+        }),
+      );
+
+      return ResponseSuccess(newData, MESS_CODE['SUCCESS']);
     } catch (err) {
       throw new BadRequestException(err.message);
     }
+  }
+
+  async getConversation(memberId: string) {
+    try {
+      let where: Prisma.ConversationWhereInput = {
+        isDeleted: false,
+      };
+
+      where.AND = { member: { some: { memberId: memberId } } };
+
+      where = cleanup(where);
+
+      const [total, data] = await this.prismaService.$transaction([
+        this.prismaService.conversation.count({ where }),
+        this.prismaService.conversation.findMany({
+          where,
+          select: {
+            id: true,
+            avatar: true,
+            typeConversation: true,
+            leaderId: true,
+            lastMessage: {
+              select: {
+                id: true,
+                content: true,
+                createdAt: true,
+              },
+            },
+            updatedAt: true,
+            member: {
+              select: {
+                doctor: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                    avatar: true,
+                  },
+                },
+                patient: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                    avatar: true,
+                  },
+                },
+              },
+            },
+          },
+
+          orderBy: {
+            createdAt: 'desc',
+          },
+        }),
+      ]);
+      console.log('data', data);
+
+      const newData = await Promise.all(
+        data?.map(async (conversation) => {
+          const lstMember = [];
+          for (const member of conversation.member) {
+            if (member?.doctor) {
+              member['user'] = member.doctor;
+              delete member.doctor;
+              delete member.patient;
+              lstMember.push(member['user']);
+            }
+            if (member?.patient) {
+              member['user'] = member.patient;
+              delete member.doctor;
+              delete member.patient;
+              lstMember.push(member['user']);
+            }
+          }
+          return conversation;
+        }),
+      );
+
+      return ResponseSuccess(newData, MESS_CODE['SUCCESS'], {
+        total,
+      });
+    } catch (error) {}
   }
 
   async postMessage(memberId: string, id: string, dto: PostMessageDto) {
@@ -74,14 +165,26 @@ export class ChatService {
         createdAt: memberId,
       };
 
-      await this.prismaService.message.create({
+      const data = await this.prismaService.message.create({
         data: messageData,
+      });
+
+      await this.prismaService.conversation.update({
+        where: {
+          id,
+        },
+        data: {
+          updatedAt: data.createdAt,
+          updatedBy: data.createdBy,
+        },
       });
 
       await this.socketsService.newMessage({
         conversationId: id,
         data: messageData,
       });
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       throw new BadRequestException(err.message);
     }

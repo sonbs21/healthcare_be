@@ -9,7 +9,6 @@ import { BmiModule } from './bmi/bmi.module';
 import { CarerModule } from './carer/carer.module';
 import { ChatModule } from './chat/chat.module';
 import { CholesterolModule } from './cholesterol/cholesterol.module';
-import { ConversationModule } from './conversation/conversation.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { GlucoseModule } from './glucose/glucose.module';
 import { HealthRecordModule } from './health-record/health-record.module';
@@ -24,7 +23,6 @@ import { PatientModule } from './patient/patient.module';
     PatientModule,
     UsersModule,
     HealthRecordModule,
-    ConversationModule,
     BmiModule,
     HeartbeatModule,
     BloodPressureModule,
@@ -32,7 +30,6 @@ import { PatientModule } from './patient/patient.module';
     CholesterolModule,
     CarerModule,
     AppointmentModule,
-    ConversationModule,
     ChatModule,
     SocketGateWayModule,
     NotificationsModule,
