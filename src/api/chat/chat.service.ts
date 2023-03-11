@@ -195,11 +195,42 @@ export class ChatService {
         },
       });
 
+      const user = await this.prismaService.user.findFirst({
+        where: {
+          memberId: data.createdBy,
+        },
+        select: {
+          doctor: {
+            select: {
+              id: true,
+              avatar: true,
+              fullName: true,
+            },
+          },
+          patient: {
+            select: {
+              id: true,
+              avatar: true,
+              fullName: true,
+            },
+          },
+        },
+      });
+
+      if (user.doctor) {
+        data['user'] = user.doctor;
+      }
+
+      if (user.patient) {
+        data['user'] = user.patient;
+      }
+
       await this.prismaService.conversation.update({
         where: {
           id,
         },
         data: {
+          lastMessageId: data.id,
           updatedAt: data.createdAt,
           updatedBy: data.createdBy,
         },
