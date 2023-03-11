@@ -21,15 +21,9 @@ export class ChatService {
           conversationId: id,
           isDeleted: false,
         },
-        select: {
-          content: true,
-          createdAt: true,
-          createdBy: true,
-        },
         skip: !dto?.isAll ? skip : undefined,
         take: !dto?.isAll ? take : undefined,
       });
-
       const newData = await Promise.all(
         data.map(async (item) => {
           const user = await this.prismaService.user.findFirst({
@@ -41,6 +35,7 @@ export class ChatService {
               patient: true,
             },
           });
+
           if (user.doctor) {
             item['user'] = user.doctor;
           }
@@ -48,6 +43,8 @@ export class ChatService {
           if (user.patient) {
             item['user'] = user.patient;
           }
+
+          return item;
         }),
       );
 
@@ -168,6 +165,7 @@ export class ChatService {
                 connect: dto.file.map((i) => ({ id: i })),
               }
             : undefined,
+          createdBy: memberId,
         },
         include: {
           file: true,
