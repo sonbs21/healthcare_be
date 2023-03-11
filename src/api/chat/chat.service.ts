@@ -21,6 +21,15 @@ export class ChatService {
           conversationId: id,
           isDeleted: false,
         },
+        select: {
+          id: true,
+          conversationId: true,
+          typeMessage: true,
+          content: true,
+          createdAt: true,
+          createdBy: true,
+          file: true,
+        },
         skip: !dto?.isAll ? skip : undefined,
         take: !dto?.isAll ? take : undefined,
       });
@@ -31,8 +40,20 @@ export class ChatService {
               memberId: item.createdBy,
             },
             include: {
-              doctor: true,
-              patient: true,
+              doctor: {
+                select: {
+                  id: true,
+                  avatar: true,
+                  fullName: true,
+                },
+              },
+              patient: {
+                select: {
+                  id: true,
+                  avatar: true,
+                  fullName: true,
+                },
+              },
             },
           });
 
@@ -48,7 +69,9 @@ export class ChatService {
         }),
       );
 
-      return ResponseSuccess(newData, MESS_CODE['SUCCESS']);
+      return ResponseSuccess(newData, MESS_CODE['SUCCESS'], {
+        pagination: !dto?.isAll ? pagination : undefined,
+      });
     } catch (err) {
       throw new BadRequestException(err.message);
     }
