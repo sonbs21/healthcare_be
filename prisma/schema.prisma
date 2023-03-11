@@ -32,6 +32,7 @@ enum StatusAppointment {
   APPROVED
   REFUSED
   CANCELED
+  COMPLETED
 }
 
 enum TypeMessage {

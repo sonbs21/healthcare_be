@@ -6,7 +6,6 @@ import {
   Controller,
   Delete,
   Get,
-  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -19,7 +18,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { AppointmentService } from './appointment.service';
-import { CreateAppointmentDto, FilterAppointmentDto, ReasonAppointmentDto, UpdateAppointmentDto } from './dto';
+import { CreateAppointmentDto, FilterAppointmentDto, UpdateAppointmentDto } from './dto';
 
 @Controller('v1')
 @ApiTags('Appointment')

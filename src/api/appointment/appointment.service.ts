@@ -6,7 +6,7 @@ import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
 import { cleanup, convertFilterStringToArray, MESS_CODE, t } from '@utils';
 import moment from 'moment';
-import { CreateAppointmentDto, FilterAppointmentDto, ReasonAppointmentDto, UpdateAppointmentDto } from './dto';
+import { CreateAppointmentDto, FilterAppointmentDto, UpdateAppointmentDto } from './dto';
 
 @Injectable()
 export class AppointmentService {
@@ -163,6 +163,7 @@ export class AppointmentService {
         this.prismaService.appointment.count({
           where: {
             patientId: memberId,
+            statusAppointment: dto.status,
             createdAt:
               startDate || endDate
                 ? {
@@ -175,6 +176,7 @@ export class AppointmentService {
         this.prismaService.appointment.findMany({
           where: {
             patientId: memberId,
+            statusAppointment: dto.status,
             createdAt:
               startDate || endDate
                 ? {
@@ -203,8 +205,26 @@ export class AppointmentService {
           take: take,
         }),
       ]);
+      const newData = await Promise.all(
+        data.map(async (item) => {
+          console.log(item.dateMeeting.getTime() < Date.now() && item.statusAppointment === StatusAppointment.APPROVED);
+          if (item.dateMeeting.getTime() < Date.now() && item.statusAppointment === StatusAppointment.APPROVED) {
+            const itemUpdate = await this.prismaService.appointment.update({
+              where: {
+                id: item.id,
+              },
+              data: {
+                statusAppointment: StatusAppointment.COMPLETED,
+              },
+            });
 
-      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
+            return itemUpdate;
+          }
+          return item;
+        }),
+      );
+
+      return ResponseSuccess(newData, MESS_CODE['SUCCESS'], {
         pagination: pagination,
         total,
       });

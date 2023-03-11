@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { StatusAppointment } from '@prisma/client';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsDate, IsNumber, IsOptional, IsString, Min } from 'class-validator';
-import * as moment from 'moment';
+import { IsBoolean, IsDate, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class FilterAppointmentDto {
   @IsString()
@@ -14,6 +14,11 @@ export class FilterAppointmentDto {
   @IsOptional()
   @ApiPropertyOptional({ example: '' })
   ids?: string;
+
+  @IsEnum(StatusAppointment)
+  @IsOptional()
+  @ApiPropertyOptional({ example: StatusAppointment.CREATED })
+  status?: StatusAppointment;
 
   @IsDate()
   @IsOptional()
