@@ -140,6 +140,7 @@ export class ChatService {
 
   async postMessage(memberId: string, id: string, dto: PostMessageDto) {
     try {
+      const { file = [] } = dto;
       const conversation = await this.prismaService.conversation.findFirst({
         where: {
           id,
@@ -156,17 +157,21 @@ export class ChatService {
       if (!conversation) {
         throw new BadRequestException(t(MESS_CODE['CONVERSATION_NOT_FOUND']));
       }
-      const attachmentsData = dto?.attachment ?? [];
-
-      const messageData: any = {
-        conversationId: id,
-        content: dto.content,
-        attachments: attachmentsData || [],
-        createdAt: memberId,
-      };
 
       const data = await this.prismaService.message.create({
-        data: messageData,
+        data: {
+          conversationId: id,
+          typeMessage: dto.typeMessage,
+          content: dto.content,
+          file: file.length
+            ? {
+                connect: dto.file.map((i) => ({ id: i })),
+              }
+            : undefined,
+        },
+        include: {
+          file: true,
+        },
       });
 
       await this.prismaService.conversation.update({
@@ -181,7 +186,7 @@ export class ChatService {
 
       await this.socketsService.newMessage({
         conversationId: id,
-        data: messageData,
+        data: data,
       });
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});

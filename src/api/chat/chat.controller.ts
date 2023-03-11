@@ -29,6 +29,7 @@ export class ChatController {
   @Post('chat/:id')
   @HttpCode(HttpStatus.CREATED)
   postMessage(@CurrentUser() user, @Param('id') id: string, @Body() dto: PostMessageDto) {
+    console.log('user', user);
     return this.chatService.postMessage(user['memberId'], id, dto);
   }
 }
