@@ -160,7 +160,8 @@ model Conversation {
   avatar           String?           @db.Text()
   typeConversation TypeConversation? @default(SINGLE)
 
-  leaderId String? @db.VarChar(32)
+  leaderId      String? @db.VarChar(32)
+  lastMessageId String? @db.VarChar(32) @unique
 
   createdAt DateTime @default(now())
   createdBy String?  @db.VarChar(32)
@@ -169,9 +170,10 @@ model Conversation {
   isDeleted Boolean  @default(false) @db.TinyInt()
   deletedBy String?  @db.VarChar(32)
 
-  doctor  Doctor?   @relation("doctor_conversation", fields: [leaderId], references: [id])
-  message Message[] @relation("conversation_message")
-  member  User[]    @relation("user_conversation")
+  doctor      Doctor?   @relation("doctor_conversation", fields: [leaderId], references: [id])
+  message     Message[] @relation("conversation_message")
+  lastMessage Message?   @relation("conversation_last_message", fields: [lastMessageId], references: [id])
+  member      User[]    @relation("user_conversation")
 }
 
 model Message {
@@ -189,7 +191,8 @@ model Message {
   isDeleted Boolean  @default(false) @db.TinyInt()
   deletedBy String?  @db.VarChar(32)
 
-  conversation Conversation? @relation("conversation_message", fields: [conversationId], references: [id])
+  conversation     Conversation? @relation("conversation_message", fields: [conversationId], references: [id])
+  conversationLast Conversation? @relation("conversation_last_message")
 }
 
 model Notification {

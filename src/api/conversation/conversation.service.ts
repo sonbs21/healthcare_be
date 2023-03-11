@@ -70,15 +70,66 @@ export class ConversationService {
           where,
           select: {
             id: true,
-            // type
+            avatar: true,
+            typeConversation: true,
+            leaderId: true,
+            lastMessage: {
+              select: {
+                id: true,
+                content: true,
+                createdAt: true,
+              },
+            },
+            updatedAt: true,
+            member: {
+              select: {
+                doctor: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                    avatar: true,
+                  },
+                },
+                patient: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                    avatar: true,
+                  },
+                },
+              },
+            },
           },
+
           orderBy: {
             createdAt: 'desc',
           },
         }),
       ]);
+      console.log('data', data);
 
-      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
+      const newData = await Promise.all(
+        data?.map(async (conversation) => {
+          const lstMember = [];
+          for (const member of conversation.member) {
+            if (member?.doctor) {
+              member['user'] = member.doctor;
+              delete member.doctor;
+              delete member.patient;
+              lstMember.push(member['user']);
+            }
+            if (member?.patient) {
+              member['user'] = member.patient;
+              delete member.doctor;
+              delete member.patient;
+              lstMember.push(member['user']);
+            }
+          }
+          return conversation;
+        }),
+      );
+
+      return ResponseSuccess(newData, MESS_CODE['SUCCESS'], {
         total,
       });
     } catch (error) {}

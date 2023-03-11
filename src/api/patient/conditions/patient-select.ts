@@ -18,6 +18,11 @@ export const patientSelect: Prisma.PatientSelect = {
       phone: true,
     },
   },
+  healthRecord: {
+    select: {
+      id: true,
+    },
+  },
   doctorId: true,
   doctor: {
     select: {

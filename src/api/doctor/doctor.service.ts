@@ -162,7 +162,71 @@ export class DoctorService {
         }),
       ]);
 
-      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
+      const newData = await Promise.all(
+        data.map(async (patient: any) => {
+          const bloodPressure = await this.prismaService.bloodPressure.findFirst({
+            where: {
+              healthRecordId: patient.healthRecord.id,
+            },
+            orderBy: {
+              createdAt: 'asc',
+            },
+          });
+
+          patient['systolic'] = bloodPressure.systolic;
+          patient['diastolic'] = bloodPressure.diastolic;
+
+          const heartbeat = await this.prismaService.heartbeat.findFirst({
+            where: {
+              healthRecordId: patient.healthRecord.id,
+            },
+            orderBy: {
+              createdAt: 'asc',
+            },
+          });
+
+          patient['heartRateIndicator'] = heartbeat.heartRateIndicator;
+
+          const bmi = await this.prismaService.bmi.findFirst({
+            where: {
+              healthRecordId: patient.healthRecord.id,
+            },
+            orderBy: {
+              createdAt: 'asc',
+            },
+          });
+
+          patient['height'] = bmi.height;
+          patient['weight'] = bmi.weight;
+          patient['indexBmi'] = bmi.indexBmi;
+
+          const cholesterol = await this.prismaService.cholesterol.findFirst({
+            where: {
+              healthRecordId: patient.healthRecord.id,
+            },
+            orderBy: {
+              createdAt: 'asc',
+            },
+          });
+
+          patient['cholesterol'] = cholesterol.cholesterol;
+
+          const glucose = await this.prismaService.glucose.findFirst({
+            where: {
+              healthRecordId: patient.healthRecord.id,
+            },
+            orderBy: {
+              createdAt: 'asc',
+            },
+          });
+
+          patient['glucose'] = glucose.glucose;
+
+          return patient;
+        }),
+      );
+
+      return ResponseSuccess(newData, MESS_CODE['SUCCESS'], {
         pagination: !dto?.isAll ? pagination : undefined,
         total,
       });
