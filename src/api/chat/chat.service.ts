@@ -125,11 +125,10 @@ export class ChatService {
           },
 
           orderBy: {
-            createdAt: 'desc',
+            updatedAt: 'desc',
           },
         }),
       ]);
-      console.log('data', data);
 
       const newData = await Promise.all(
         data?.map(async (conversation) => {

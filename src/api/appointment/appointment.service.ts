@@ -207,7 +207,6 @@ export class AppointmentService {
       ]);
       const newData = await Promise.all(
         data.map(async (item) => {
-          console.log(item.dateMeeting.getTime() < Date.now() && item.statusAppointment === StatusAppointment.APPROVED);
           if (item.dateMeeting.getTime() < Date.now() && item.statusAppointment === StatusAppointment.APPROVED) {
             const itemUpdate = await this.prismaService.appointment.update({
               where: {

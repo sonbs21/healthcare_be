@@ -14,7 +14,6 @@ export class SocketGateWayService implements OnModuleInit {
   onModuleInit() {
     this.server.on('connection', async (socket) => {
       const authToken = socket.handshake.query['Authorization'];
-
       const user = await this.jwtService.decode(authToken as string);
       if (user?.['id']) {
         const userExist = await this.prismaService.user.findFirst({
@@ -85,7 +84,6 @@ export class SocketGateWayService implements OnModuleInit {
         member: true,
       },
     });
-
 
     await conversation.member.map((item) => {
       lstMember.push(item.id);

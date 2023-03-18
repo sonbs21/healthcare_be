@@ -586,10 +586,11 @@ export class HealthRecordService {
           patientId: memberId,
         },
         select: {
+          status: true,
           id: true,
         },
       });
-
+      data['status'] = healthRecord.status;
       data['healthRecordId'] = healthRecord.id;
 
       const bmi = await this.prismaService.bmi.findFirst({
