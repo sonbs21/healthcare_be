@@ -8,7 +8,7 @@ import { PrismaService } from '@services';
 import { Pagination } from '@types';
 import { cleanup } from '@utils';
 import { patientSelect } from './conditions';
-import { FilterPatientsDto, SelectDoctorDto, UpdatePatientDto } from './dto';
+import { FilterPatientsDto, RatingDto, SelectDoctorDto, UpdatePatientDto } from './dto';
 
 @Injectable()
 export class PatientService {
@@ -215,6 +215,59 @@ export class PatientService {
           }
         }),
       );
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  async createRating(memberId: string, dto: RatingDto) {
+    try {
+      const rating = await this.prismaService.rating.findFirst({
+        where: {
+          patientId: memberId,
+          doctorId: dto.doctorId,
+        },
+      });
+
+      if (rating) {
+        const data = await this.prismaService.rating.update({
+          where: {
+            id: rating?.id,
+          },
+          data: {
+            rate: Number(dto.rating),
+            updatedBy: memberId,
+          },
+        });
+        return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
+      } else {
+        const data = await this.prismaService.rating.create({
+          data: {
+            rate: Number(dto.rating),
+            doctorId: dto.doctorId,
+            patientId: memberId,
+            createdBy: memberId,
+          },
+        });
+
+        return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
+      }
+    } catch (err) {
+      console.log(err.message);
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  async getRating(memberId: string, dto: SelectDoctorDto) {
+    try {
+      const data = await this.prismaService.rating.findFirst({
+        where: {
+          patientId: memberId,
+          doctorId: dto.doctorId,
+        },
+      });
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {

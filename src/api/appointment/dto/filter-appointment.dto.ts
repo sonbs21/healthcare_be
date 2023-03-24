@@ -23,12 +23,7 @@ export class FilterAppointmentDto {
   @IsDate()
   @IsOptional()
   @ApiPropertyOptional()
-  startDate?: Date;
-
-  @IsDate()
-  @IsOptional()
-  @ApiPropertyOptional()
-  endDate?: Date;
+  timeDate?: Date;
 
   @IsBoolean()
   @Transform(({ obj, key }) => obj[key] === 'true')

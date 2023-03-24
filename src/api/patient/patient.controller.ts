@@ -1,10 +1,10 @@
 /* eslint-disable prettier/prettier */
 import { JwtAuthGuard } from '@auth/guards';
 import { CurrentUser, Paginate } from '@decorators';
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
-import { FilterPatientsDto, SelectDoctorDto, UpdatePatientDto } from './dto';
+import { FilterPatientsDto, RatingDto, SelectDoctorDto, UpdatePatientDto } from './dto';
 import { PatientService } from './patient.service';
 
 @Controller('v1')
@@ -42,5 +42,17 @@ export class PatientController {
   @HttpCode(HttpStatus.OK)
   revokeDoctor(@CurrentUser() user) {
     return this.patientService.revokeDoctor(user['id']);
+  }
+
+  @Post('patient/rating')
+  @HttpCode(HttpStatus.OK)
+  createRating(@CurrentUser() user, @Body() dto: RatingDto) {
+    return this.patientService.createRating(user['memberId'], dto);
+  }
+
+  @Get('patient/rating')
+  @HttpCode(HttpStatus.OK)
+  getRating(@CurrentUser() user, @Query() dto: SelectDoctorDto) {
+    return this.patientService.getRating(user['memberId'], dto);
   }
 }

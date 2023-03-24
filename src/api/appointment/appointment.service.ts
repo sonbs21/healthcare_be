@@ -25,15 +25,7 @@ export class AppointmentService {
   async findAll(dto: FilterAppointmentDto, pagination: Pagination) {
     try {
       const { skip, take } = pagination;
-      const { startDate, endDate } = dto;
       let where: Prisma.AppointmentWhereInput = {
-        createdAt:
-          startDate || endDate
-            ? {
-                gte: startDate ? moment(startDate).toISOString() : undefined,
-                lte: endDate ? moment(endDate).toISOString() : undefined,
-              }
-            : undefined,
         isDeleted: false,
       };
 
@@ -98,31 +90,38 @@ export class AppointmentService {
   async getAppointmentDoctor(memberId: string, dto: FilterAppointmentDto, pagination: Pagination) {
     try {
       const { skip, take } = pagination;
-      const { startDate, endDate } = dto;
+      const { timeDate } = dto;
+      const date = timeDate ? new Date(timeDate) : new Date();
+
+      date.setHours(0, 0, 0, 0);
+      const timeInMs = date.getTime();
+
+      const gte = new Date(timeInMs).toISOString();
+      const lte = new Date(timeInMs + 86399999).toISOString();
 
       const [total, data] = await this.prismaService.$transaction([
         this.prismaService.appointment.count({
           where: {
             doctorId: memberId,
-            createdAt:
-              startDate || endDate
-                ? {
-                    gte: startDate ? moment(startDate).toISOString() : undefined,
-                    lte: endDate ? moment(endDate).toISOString() : undefined,
-                  }
-                : undefined,
+            statusAppointment: dto.status,
+            dateMeeting: timeDate
+              ? {
+                  gte: timeDate ? gte : undefined,
+                  lte: timeDate ? lte : undefined,
+                }
+              : undefined,
           },
         }),
         this.prismaService.appointment.findMany({
           where: {
             doctorId: memberId,
-            createdAt:
-              startDate || endDate
-                ? {
-                    gte: startDate ? moment(startDate).toISOString() : undefined,
-                    lte: endDate ? moment(endDate).toISOString() : undefined,
-                  }
-                : undefined,
+            statusAppointment: dto.status,
+            dateMeeting: timeDate
+              ? {
+                  gte: timeDate ? gte : undefined,
+                  lte: timeDate ? lte : undefined,
+                }
+              : undefined,
           },
           select: {
             id: true,
@@ -157,33 +156,36 @@ export class AppointmentService {
   async getAppointmentPatient(memberId: string, dto: FilterAppointmentDto, pagination: Pagination) {
     try {
       const { skip, take } = pagination;
-      const { startDate, endDate } = dto;
+      const { timeDate } = dto;
+      const date = timeDate ? new Date(timeDate) : new Date();
+      date.setHours(0, 0, 0, 0);
+      const timeInMs = date.getTime();
 
+      const gte = new Date(timeInMs).toISOString();
+      const lte = new Date(timeInMs + 86399999).toISOString();
       const [total, data] = await this.prismaService.$transaction([
         this.prismaService.appointment.count({
           where: {
             patientId: memberId,
             statusAppointment: dto.status,
-            createdAt:
-              startDate || endDate
-                ? {
-                    gte: startDate ? moment(startDate).toISOString() : undefined,
-                    lte: endDate ? moment(endDate).toISOString() : undefined,
-                  }
-                : undefined,
+            dateMeeting: timeDate
+              ? {
+                  gte: timeDate ? gte : undefined,
+                  lte: timeDate ? lte : undefined,
+                }
+              : undefined,
           },
         }),
         this.prismaService.appointment.findMany({
           where: {
             patientId: memberId,
             statusAppointment: dto.status,
-            createdAt:
-              startDate || endDate
-                ? {
-                    gte: startDate ? moment(startDate).toISOString() : undefined,
-                    lte: endDate ? moment(endDate).toISOString() : undefined,
-                  }
-                : undefined,
+            dateMeeting: timeDate
+              ? {
+                  gte: timeDate ? gte : undefined,
+                  lte: timeDate ? lte : undefined,
+                }
+              : undefined,
           },
           select: {
             id: true,

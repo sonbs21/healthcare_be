@@ -479,6 +479,7 @@ export class HealthRecordService {
           diastolic: true,
         },
       });
+
       const rcBloodPressure = recordBloodPressure(systolic, diastolic);
       data['systolic'] = bloodPressure.systolic;
       data['diastolic'] = bloodPressure.diastolic;
@@ -514,7 +515,6 @@ export class HealthRecordService {
       });
 
       data['status'] = healthRecord.status;
-
       const notification = await this.prismaService.notification.create({
         data: {
           title: 'Cảnh báo',

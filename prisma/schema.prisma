@@ -89,7 +89,7 @@ model Doctor {
   phone       String?   @db.VarChar(255)
   email       String?   @db.VarChar(255)
   avatar      String?   @db.VarChar(255)
-  description String?   @db.VarChar(255)
+  description String?   @db.Text()
   experience  String?   @db.VarChar(255)
   workPlace   String?   @db.VarChar(255)
   specialize  String?   @db.VarChar(255)
@@ -105,8 +105,27 @@ model Doctor {
 
   user         User?          @relation("user_doctor")
   patient      Patient[]      @relation("doctor_patient")
+  rating       Rating[]       @relation("doctor_rating")
   conversation Conversation[] @relation("doctor_conversation")
   appointments Appointment[]  @relation("doctor_appointments")
+}
+
+model Rating {
+  id   String @id @default(cuid()) @db.VarChar(32)
+  rate Int    @db.SmallInt
+
+  createdAt DateTime @default(now())
+  createdBy String?  @db.VarChar(32)
+  updatedAt DateTime @updatedAt
+  updatedBy String?  @db.VarChar(32)
+  isDeleted Boolean  @default(false) @db.TinyInt()
+  deletedBy String?  @db.VarChar(32)
+
+  patientId String? @db.VarChar(32)
+  doctorId  String? @db.VarChar(32)
+
+  doctor  Doctor?  @relation("doctor_rating", fields: [doctorId], references: [id])
+  patient Patient? @relation("patient_rating", fields: [patientId], references: [id])
 }
 
 model Patient {
@@ -135,6 +154,7 @@ model Patient {
   doctor       Doctor?       @relation("doctor_patient", fields: [doctorId], references: [id])
   healthRecord HealthRecord? @relation("health_record_patient")
   carer        Carer[]       @relation("patient_carer")
+  rating       Rating[]      @relation("patient_rating")
   appointments Appointment[] @relation("patient_appointments")
 }
 
@@ -177,9 +197,9 @@ model Conversation {
 }
 
 model Message {
-  id          String  @id @default(cuid()) @db.VarChar(32)
+  id          String       @id @default(cuid()) @db.VarChar(32)
   typeMessage TypeMessage?
-  content     String? @db.VarChar(255)
+  content     String?      @db.VarChar(255)
 
   conversationId String? @db.VarChar(32)
 

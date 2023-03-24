@@ -32,21 +32,46 @@ export class DoctorService {
             { description: { contains: dto?.search } },
             { experience: { contains: dto?.search } },
             { workPlace: { contains: dto?.search } },
-            ,
             { specialize: { contains: dto?.search } },
           ],
         });
       }
 
-      const ids = convertFilterStringToArray(dto?.ids);
-      if (ids && ids?.length > 0) {
-        whereAND.push({ id: { in: ids } });
-      }
+      // const ids = convertFilterStringToArray(dto?.ids);
+      // if (ids && ids?.length > 0) {
+      // }
 
       if (whereAND.length) {
         where.AND = [...whereAND];
       }
+      const doctorIds = [];
+      const avgArr = [];
       if (whereOR.length) where.OR = [...whereOR];
+      const avgRate = await this.prismaService.rating.groupBy({
+        by: ['doctorId'],
+        _avg: {
+          rate: true,
+        },
+        orderBy: {
+          _avg: {
+            rate: 'desc',
+          },
+        },
+        skip: !dto?.isAll ? skip : undefined,
+        take: !dto?.isAll ? take : undefined,
+      });
+
+      avgRate.map((i) => {
+        avgArr.push({
+          rating: i._avg.rate,
+          doctorId: i.doctorId,
+        });
+        doctorIds.push(i.doctorId);
+      });
+
+      if (doctorIds.length) {
+        whereAND.push({ id: { in: doctorIds } });
+      }
 
       where = cleanup(where);
 
@@ -57,13 +82,25 @@ export class DoctorService {
           select: doctorsSelect,
           skip: !dto?.isAll ? skip : undefined,
           take: !dto?.isAll ? take : undefined,
-          orderBy: {
-            createdAt: 'desc',
-          },
         }),
       ]);
+      const newData = [];
+      await Promise.all(
+        data.map((i) => {
+          avgArr.map((j) => {
+            if (i.id === j.doctorId) {
+              newData.push({
+                ...i,
+                rating: this.customRound(j.rating) ?? 0,
+              });
 
-      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
+              return;
+            }
+          });
+        }),
+      );
+
+      return ResponseSuccess(newData, MESS_CODE['SUCCESS'], {
         pagination: !dto?.isAll ? pagination : undefined,
         total,
       });
@@ -84,8 +121,15 @@ export class DoctorService {
         select: doctorsSelect,
       });
 
+      const rating = await this.prismaService.rating.aggregate({
+        _avg: {
+          rate: true,
+        },
+      });
+
       const patientCount = data.patient.length;
       data['countPatient'] = patientCount;
+      data['rate'] = this.customRound(rating?._avg?.rate) ?? 0;
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
@@ -115,6 +159,7 @@ export class DoctorService {
 
   async getAllPatient(memberId: string, dto: FilterPatientsWithDoctorIdDto, pagination: Pagination) {
     try {
+      console.log('dto', dto);
       const { skip, take } = pagination;
       let where: Prisma.PatientWhereInput = {
         isDeleted: false,
@@ -126,14 +171,7 @@ export class DoctorService {
 
       if (dto?.search) {
         whereOR.push({
-          OR: [
-            { fullName: { contains: dto?.search } },
-            { email: { contains: dto?.search } },
-            { description: { contains: dto?.search } },
-            { experience: { contains: dto?.search } },
-            { workPlace: { contains: dto?.search } },
-            { specialize: { contains: dto?.search } },
-          ],
+          OR: [{ fullName: { contains: dto?.search } }],
         });
       }
 
@@ -173,8 +211,8 @@ export class DoctorService {
             },
           });
 
-          patient['systolic'] = bloodPressure.systolic;
-          patient['diastolic'] = bloodPressure.diastolic;
+          patient['systolic'] = bloodPressure?.systolic;
+          patient['diastolic'] = bloodPressure?.diastolic;
 
           const heartbeat = await this.prismaService.heartbeat.findFirst({
             where: {
@@ -185,7 +223,7 @@ export class DoctorService {
             },
           });
 
-          patient['heartRateIndicator'] = heartbeat.heartRateIndicator;
+          patient['heartRateIndicator'] = heartbeat?.heartRateIndicator;
 
           const bmi = await this.prismaService.bmi.findFirst({
             where: {
@@ -196,9 +234,9 @@ export class DoctorService {
             },
           });
 
-          patient['height'] = bmi.height;
-          patient['weight'] = bmi.weight;
-          patient['indexBmi'] = bmi.indexBmi;
+          patient['height'] = bmi?.height;
+          patient['weight'] = bmi?.weight;
+          patient['indexBmi'] = bmi?.indexBmi;
 
           const cholesterol = await this.prismaService.cholesterol.findFirst({
             where: {
@@ -209,7 +247,7 @@ export class DoctorService {
             },
           });
 
-          patient['cholesterol'] = cholesterol.cholesterol;
+          patient['cholesterol'] = cholesterol?.cholesterol;
 
           const glucose = await this.prismaService.glucose.findFirst({
             where: {
@@ -220,7 +258,7 @@ export class DoctorService {
             },
           });
 
-          patient['glucose'] = glucose.glucose;
+          patient['glucose'] = glucose?.glucose;
 
           return patient;
         }),
@@ -231,6 +269,7 @@ export class DoctorService {
         total,
       });
     } catch (err) {
+      console.log('err', err.message);
       throw new BadRequestException(err.message);
     }
   }
@@ -337,5 +376,15 @@ export class DoctorService {
     } catch (err) {
       throw new BadRequestException(err.message);
     }
+  }
+
+  customRound(num) {
+    const decimal = num - Math.floor(num);
+    if (decimal >= 0.1 && decimal <= 0.5) {
+      return Math.floor(num) + 0.5;
+    } else if (decimal > 0.5 && decimal <= 0.9999) {
+      return Math.ceil(num);
+    }
+    return num;
   }
 }

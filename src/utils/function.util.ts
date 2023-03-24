@@ -111,6 +111,11 @@ export const recordBloodPressure = (systolic, diastolic) => {
       status: 'HIGH',
       message: 'Huyết áp của bạn trong trạng thái cao. Hãy liên hệ bác sĩ để được chăm sóc',
     };
+  } else {
+    return {
+      status: 'HIGH',
+      message: 'Huyết áp của bạn trong trạng thái cao. Hãy liên hệ bác sĩ để được chăm sóc',
+    };
   }
 };
 
