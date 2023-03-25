@@ -421,7 +421,7 @@ export class AppointmentService {
         },
       });
 
-      const doctor = await this.prismaService.patient.findFirst({
+      const doctor = await this.prismaService.doctor.findFirst({
         where: {
           id: memberId,
         },
@@ -460,7 +460,7 @@ export class AppointmentService {
             content: `Bác sĩ ${doctor.fullName} đã hủy lịch hẹn`,
             typeNotification: TypeNotification.APPOINTMENT,
             isRead: false,
-            userId: appointment.doctorId,
+            userId: appointment.patientId,
           },
         });
         await this.socketsService.newNotification({

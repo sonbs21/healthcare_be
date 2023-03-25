@@ -20,6 +20,12 @@ export class PatientController {
     return this.patientService.findAll(dto, pagination);
   }
 
+  @Get('patient/rating')
+  @HttpCode(HttpStatus.OK)
+  getRating(@CurrentUser() user, @Query() dto: SelectDoctorDto) {
+    return this.patientService.getRating(user['memberId'], dto);
+  }
+
   @Get('patient/:id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {
@@ -50,9 +56,5 @@ export class PatientController {
     return this.patientService.createRating(user['memberId'], dto);
   }
 
-  @Get('patient/rating')
-  @HttpCode(HttpStatus.OK)
-  getRating(@CurrentUser() user, @Query() dto: SelectDoctorDto) {
-    return this.patientService.getRating(user['memberId'], dto);
-  }
+  
 }
