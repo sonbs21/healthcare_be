@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { ResponseSuccess } from '@/types';
 import { MESS_CODE, t } from '@/utils';
+import { SocketGateWayService } from '@api/socket-io/socket-io.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@services';
@@ -11,7 +12,7 @@ import { CreateNotificationsDto, FilterNotificationsDto, UpdateNotificationDto }
 
 @Injectable()
 export class NotificationsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private prismaService: PrismaService, private socketsService: SocketGateWayService) {}
 
   async checkNotificationExist(options: Prisma.NotificationWhereInput) {
     return await this.prismaService.notification.findFirst({
@@ -116,6 +117,10 @@ export class NotificationsService {
           isRead: false,
           createdBy: userId,
         },
+      });
+      await this.socketsService.newNotification({
+        notificationId: data.id,
+        data: data,
       });
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {

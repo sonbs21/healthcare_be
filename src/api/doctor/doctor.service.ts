@@ -23,7 +23,7 @@ export class DoctorService {
 
       const whereAND = [];
       const whereOR = [];
-
+//
       if (dto.search) {
         whereAND.push({
           OR: [
@@ -159,7 +159,6 @@ export class DoctorService {
 
   async getAllPatient(memberId: string, dto: FilterPatientsWithDoctorIdDto, pagination: Pagination) {
     try {
-      console.log('dto', dto);
       const { skip, take } = pagination;
       let where: Prisma.PatientWhereInput = {
         isDeleted: false,

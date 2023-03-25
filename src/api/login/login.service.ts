@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { ResponseSuccess } from '@/types';
-import { MESS_CODE, PASSWORD_REGEX, t } from '@/utils';
+import { MESS_CODE, t } from '@/utils';
 import { AuthService } from '@auth/auth.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Role, Status } from '@prisma/client';

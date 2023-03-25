@@ -11,9 +11,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  MaxDate,
-  MaxLength,
-  MinLength,
+  MaxDate
 } from 'class-validator';
 import * as moment from 'moment';
 
