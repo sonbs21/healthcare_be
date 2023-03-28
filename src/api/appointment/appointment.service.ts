@@ -207,25 +207,25 @@ export class AppointmentService {
           take: take,
         }),
       ]);
-      const newData = await Promise.all(
-        data.map(async (item) => {
-          if (item.dateMeeting.getTime() < Date.now() && item.statusAppointment === StatusAppointment.APPROVED) {
-            const itemUpdate = await this.prismaService.appointment.update({
-              where: {
-                id: item.id,
-              },
-              data: {
-                statusAppointment: StatusAppointment.COMPLETED,
-              },
-            });
+      // const newData = await Promise.all(
+      //   data.map(async (item) => {
+      //     if (item.dateMeeting.getTime() < Date.now() && item.statusAppointment === StatusAppointment.APPROVED) {
+      //       const itemUpdate = await this.prismaService.appointment.update({
+      //         where: {
+      //           id: item.id,
+      //         },
+      //         data: {
+      //           statusAppointment: StatusAppointment.COMPLETED,
+      //         },
+      //       });
 
-            return itemUpdate;
-          }
-          return item;
-        }),
-      );
+      //       return itemUpdate;
+      //     }
+      //     return item;
+      //   }),
+      // );
 
-      return ResponseSuccess(newData, MESS_CODE['SUCCESS'], {
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
         pagination: pagination,
         total,
       });
