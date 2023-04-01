@@ -90,4 +90,10 @@ export class AppointmentController {
   cancel(@CurrentUser() user, @Param('id') id: string) {
     return this.appointmentService.cancel(user['memberId'], id);
   }
+
+  @Put('appointment/:id/complete')
+  @HttpCode(HttpStatus.OK)
+  complete(@CurrentUser() user, @Param('id') id: string) {
+    return this.appointmentService.complete(user['memberId'], id);
+  }
 }

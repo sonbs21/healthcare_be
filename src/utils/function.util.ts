@@ -14,6 +14,16 @@ export const funcIndexBmi = (height, weight) => {
   return indexBmi;
 };
 
+export const customRound = (num) => {
+  const decimal = num - Math.floor(num);
+  if (decimal >= 0.1 && decimal <= 0.5) {
+    return Math.floor(num) + 0.5;
+  } else if (decimal > 0.5 && decimal <= 0.9999) {
+    return Math.ceil(num);
+  }
+  return num;
+};
+
 export const getIdPageWithFbUrl = (url: string) => {
   if (url) {
     const str = url?.split('-')[url?.split('-')?.length - 1];

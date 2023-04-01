@@ -516,4 +516,29 @@ export class AppointmentService {
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (error) {}
   }
+
+  async complete(memberId: string, id: string) {
+    try {
+      const appointment = await this.prismaService.appointment.findFirst({
+        where: {
+          id: id,
+        },
+      });
+
+      if (!appointment) {
+        throw new BadRequestException(t(MESS_CODE['BLOOD_PRESSURE_NOT_FOUND'], {}));
+      }
+
+      const data = await this.prismaService.appointment.update({
+        where: {
+          id,
+        },
+        data: {
+          statusAppointment: StatusAppointment.COMPLETED,
+          updatedBy: memberId,
+        },
+      });
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
+    } catch (error) {}
+  }
 }

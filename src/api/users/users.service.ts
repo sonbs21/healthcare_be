@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { MESS_CODE } from '@/utils';
+import { MESS_CODE, customRound } from '@/utils';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { BcryptService, PrismaService } from '@services';
@@ -40,6 +40,7 @@ export class UsersService {
           isDeleted: false,
         },
         select: {
+          memberId: true,
           role: true,
         },
       });
@@ -65,13 +66,26 @@ export class UsersService {
         select['doctor'] = true;
       }
 
-      const data = await this.prismaService.user.findFirst({
+      const data: any = await this.prismaService.user.findFirst({
         where: {
           id: userId,
           isDeleted: false,
         },
         select: select,
       });
+
+      if (me['role'] === Role.DOCTOR) {
+        const rating = await this.prismaService.rating.aggregate({
+          where: {
+            doctorId: me.memberId,
+          },
+          _avg: {
+            rate: true,
+          },
+        });
+        data.doctor['rate'] = customRound(rating?._avg?.rate) ?? 0;
+        // data['rate'] = customRound(rating?._avg?.rate) ?? 0;
+      }
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {

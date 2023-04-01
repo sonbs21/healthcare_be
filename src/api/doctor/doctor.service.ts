@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { ResponseSuccess } from '@/types';
-import { convertFilterStringToArray, MESS_CODE, t } from '@/utils';
+import { convertFilterStringToArray, customRound, MESS_CODE, t } from '@/utils';
 import { patientSelect } from '@api/patient/conditions';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -23,7 +23,7 @@ export class DoctorService {
 
       const whereAND = [];
       const whereOR = [];
-//
+      //
       if (dto.search) {
         whereAND.push({
           OR: [
@@ -91,7 +91,7 @@ export class DoctorService {
             if (i.id === j.doctorId) {
               newData.push({
                 ...i,
-                rating: this.customRound(j.rating) ?? 0,
+                rating: customRound(j.rating) ?? 0,
               });
 
               return;
@@ -122,6 +122,9 @@ export class DoctorService {
       });
 
       const rating = await this.prismaService.rating.aggregate({
+        where: {
+          doctorId: id,
+        },
         _avg: {
           rate: true,
         },
@@ -129,7 +132,7 @@ export class DoctorService {
 
       const patientCount = data.patient.length;
       data['countPatient'] = patientCount;
-      data['rate'] = this.customRound(rating?._avg?.rate) ?? 0;
+      data['rate'] = customRound(rating?._avg?.rate) ?? 0;
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
@@ -375,15 +378,5 @@ export class DoctorService {
     } catch (err) {
       throw new BadRequestException(err.message);
     }
-  }
-
-  customRound(num) {
-    const decimal = num - Math.floor(num);
-    if (decimal >= 0.1 && decimal <= 0.5) {
-      return Math.floor(num) + 0.5;
-    } else if (decimal > 0.5 && decimal <= 0.9999) {
-      return Math.ceil(num);
-    }
-    return num;
   }
 }

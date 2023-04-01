@@ -280,10 +280,7 @@ export class ChatService {
           ContentType: file.mimetype,
         };
         try {
-          console.log('data222');
-
           const data = await s3Client.send(new PutObjectCommand(params));
-          console.log('data', data);
           if (data && data?.$metadata?.httpStatusCode === 200) {
             const data = await this.prismaService.file.create({
               data: {
@@ -303,7 +300,6 @@ export class ChatService {
           throw new BadRequestException(err.message);
         }
       }
-      console.log('dataUpload', dataUpload);
       return dataUpload;
     } catch (error) {
       throw new BadRequestException(error.message);
