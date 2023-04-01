@@ -1,8 +1,9 @@
 import { JwtAuthGuard } from '@auth/guards';
 import { CurrentUser, Paginate } from '@decorators';
-import { Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
-import { Body, Query } from '@nestjs/common/decorators/http/route-params.decorator';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Query, UploadedFiles } from '@nestjs/common/decorators/http/route-params.decorator';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { ChatService } from './chat.service';
 import { FilterChatDto, PostMessageDto } from './dto';
@@ -30,5 +31,27 @@ export class ChatController {
   @HttpCode(HttpStatus.CREATED)
   postMessage(@CurrentUser() user, @Param('id') id: string, @Body() dto: PostMessageDto) {
     return this.chatService.postMessage(user['memberId'], id, dto);
+  }
+
+  @Post('upload')
+  // @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(FilesInterceptor('files', 20))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
+  uploads(@UploadedFiles() files) {
+    return this.chatService.uploads(files);
   }
 }

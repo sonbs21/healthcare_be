@@ -1,10 +1,22 @@
 import { SocketGateWayService } from '@api/socket-io/socket-io.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { PutObjectCommand, PutObjectCommandInput, S3Client } from '@aws-sdk/client-s3';
 import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
-import { cleanup, MESS_CODE, t } from '@utils';
+import { cleanup, IMAGE_REGEX, MESS_CODE, t } from '@utils';
 import { FilterChatDto, PostMessageDto } from './dto';
+import { S3 } from 'aws-sdk';
+const aws_s3_url: string = process.env.AWS_S3_URL || '';
+const bucket_region: string | undefined = process.env.AWS_S3_BUCKET_REGION;
+const bucket_name: string = process.env.AWS_S3_BUCKET_NAME || '';
+const folder_name: string = process.env.AWS_S3_FOLDER_NAME || '';
+
+const s3 = new S3({
+  apiVersion: '2006-03-01',
+  region: bucket_region,
+});
+const s3Client = new S3Client({ region: bucket_region });
 
 @Injectable()
 export class ChatService {
@@ -243,6 +255,58 @@ export class ChatService {
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       throw new BadRequestException(err.message);
+    }
+  }
+
+  async uploads(files) {
+    try {
+      const dataUpload = [];
+      if (!files.length) throw new BadRequestException(t(MESS_CODE['DATA_NOT_FOUND'], {}));
+      for (const file of files) {
+        console.log('file', file);
+        if (!file.mimetype.match(IMAGE_REGEX)) {
+          throw new BadRequestException(t(MESS_CODE['IMAGE_NOT_FORMAT'], {}));
+        }
+        if (file.size > process.env.MAX_SIZE) {
+          throw new BadRequestException(t(MESS_CODE['MAX_SIZE_WARNING'], {}));
+        }
+
+        const fileName = `${new Date().getTime()}_${file.originalname}`;
+        const params: PutObjectCommandInput = {
+          Bucket: bucket_name,
+          Key: `${folder_name}/${fileName}`,
+          Body: file.buffer,
+          ACL: 'public-read',
+          ContentType: file.mimetype,
+        };
+        try {
+          console.log('data222');
+
+          const data = await s3Client.send(new PutObjectCommand(params));
+          console.log('data', data);
+          if (data && data?.$metadata?.httpStatusCode === 200) {
+            const data = await this.prismaService.file.create({
+              data: {
+                name: fileName,
+                url: aws_s3_url + params.Key,
+              },
+              select: {
+                id: true,
+                name: true,
+                url: true,
+              },
+            });
+
+            dataUpload.push(data);
+          }
+        } catch (err) {
+          throw new BadRequestException(err.message);
+        }
+      }
+      console.log('dataUpload', dataUpload);
+      return dataUpload;
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
 }
