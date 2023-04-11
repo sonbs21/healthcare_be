@@ -60,6 +60,7 @@ export class DoctorService {
         skip: !dto?.isAll ? skip : undefined,
         take: !dto?.isAll ? take : undefined,
       });
+      console.log('🚀 ~ avgRate:', avgRate);
 
       avgRate.map((i) => {
         avgArr.push({
@@ -93,8 +94,11 @@ export class DoctorService {
                 ...i,
                 rating: customRound(j.rating) ?? 0,
               });
-
-              return;
+            } else {
+              newData.push({
+                ...i,
+                rating: 0,
+              });
             }
           });
         }),

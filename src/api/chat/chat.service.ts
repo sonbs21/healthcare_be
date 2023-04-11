@@ -262,11 +262,12 @@ export class ChatService {
     try {
       const dataUpload = [];
       if (!files.length) throw new BadRequestException(t(MESS_CODE['DATA_NOT_FOUND'], {}));
+
       for (const file of files) {
-        console.log('file', file);
-        if (!file.mimetype.match(IMAGE_REGEX)) {
-          throw new BadRequestException(t(MESS_CODE['IMAGE_NOT_FORMAT'], {}));
-        }
+        // console.log(12312321, file.mimetype.match(IMAGE_REGEX));
+        // if (!file.mimetype.match(IMAGE_REGEX)) {
+        //   throw new BadRequestException(t(MESS_CODE['IMAGE_NOT_FORMAT'], {}));
+        // }
         if (file.size > process.env.MAX_SIZE) {
           throw new BadRequestException(t(MESS_CODE['MAX_SIZE_WARNING'], {}));
         }
@@ -302,6 +303,7 @@ export class ChatService {
       }
       return dataUpload;
     } catch (error) {
+      console.log('🚀 ~~~~~~ error:', error.message);
       throw new BadRequestException(error.message);
     }
   }

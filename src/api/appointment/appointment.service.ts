@@ -5,8 +5,8 @@ import { Prisma, StatusAppointment, TypeNotification } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
 import { cleanup, convertFilterStringToArray, MESS_CODE, t } from '@utils';
-import moment from 'moment';
-import { CreateAppointmentDto, FilterAppointmentDto, UpdateAppointmentDto } from './dto';
+import * as moment from 'moment';
+import { CreateAppointmentDto, FilterAppointmentDto, GetTimeAppointmentDto, UpdateAppointmentDto } from './dto';
 
 @Injectable()
 export class AppointmentService {
@@ -144,7 +144,25 @@ export class AppointmentService {
         }),
       ]);
 
-      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
+      const newData = await Promise.all(
+        data.map(async (item) => {
+          if (item.dateMeeting.getTime() < Date.now() && item.statusAppointment === StatusAppointment.APPROVED) {
+            const itemUpdate = await this.prismaService.appointment.update({
+              where: {
+                id: item.id,
+              },
+              data: {
+                statusAppointment: StatusAppointment.COMPLETED,
+              },
+            });
+
+            return itemUpdate;
+          }
+          return item;
+        }),
+      );
+
+      return ResponseSuccess(newData, MESS_CODE['SUCCESS'], {
         pagination: pagination,
         total,
       });
@@ -207,25 +225,25 @@ export class AppointmentService {
           take: take,
         }),
       ]);
-      // const newData = await Promise.all(
-      //   data.map(async (item) => {
-      //     if (item.dateMeeting.getTime() < Date.now() && item.statusAppointment === StatusAppointment.APPROVED) {
-      //       const itemUpdate = await this.prismaService.appointment.update({
-      //         where: {
-      //           id: item.id,
-      //         },
-      //         data: {
-      //           statusAppointment: StatusAppointment.COMPLETED,
-      //         },
-      //       });
+      const newData = await Promise.all(
+        data.map(async (item) => {
+          if (item.dateMeeting.getTime() < Date.now() && item.statusAppointment === StatusAppointment.APPROVED) {
+            const itemUpdate = await this.prismaService.appointment.update({
+              where: {
+                id: item.id,
+              },
+              data: {
+                statusAppointment: StatusAppointment.COMPLETED,
+              },
+            });
 
-      //       return itemUpdate;
-      //     }
-      //     return item;
-      //   }),
-      // );
+            return itemUpdate;
+          }
+          return item;
+        }),
+      );
 
-      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {
+      return ResponseSuccess(newData, MESS_CODE['SUCCESS'], {
         pagination: pagination,
         total,
       });
@@ -271,6 +289,35 @@ export class AppointmentService {
         },
       });
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
+    } catch (error) {}
+  }
+
+  async getTimeAppointment(dto: GetTimeAppointmentDto) {
+    try {
+      const exist = await this.prismaService.doctor.findFirst({
+        where: { id: dto.doctorId },
+      });
+      if (!exist) throw new BadRequestException(t(MESS_CODE['DOCTOR_NOT_FOUND']));
+      console.log(123123);
+      console.log('🚀 ~ dto:123', moment().startOf('day').toISOString());
+
+      const arrTime = [];
+      const app = await this.prismaService.appointment.findMany({
+        where: {
+          doctorId: dto.doctorId,
+          statusAppointment: { in: [StatusAppointment.CREATED, StatusAppointment.APPROVED] },
+          createdAt: {
+            gte: moment(dto.timeDate).startOf('D').toISOString(),
+            lte: moment(dto.timeDate).endOf('D').toISOString(),
+          },
+        },
+      });
+      console.log('🚀 ~ app:', app);
+
+      await Promise.all(app.map((i) => arrTime.push(i.timeMeeting)));
+      console.log('🚀 ~ arrTime:', arrTime);
+
+      return ResponseSuccess(arrTime, MESS_CODE['SUCCESS'], {});
     } catch (error) {}
   }
 

@@ -18,7 +18,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { AppointmentService } from './appointment.service';
-import { CreateAppointmentDto, FilterAppointmentDto, UpdateAppointmentDto } from './dto';
+import { CreateAppointmentDto, FilterAppointmentDto, GetTimeAppointmentDto, UpdateAppointmentDto } from './dto';
 
 @Controller('v1')
 @ApiTags('Appointment')
@@ -49,6 +49,13 @@ export class AppointmentController {
   getAppointmentPatient(@CurrentUser() user, @Query() dto: FilterAppointmentDto, @Paginate() pagination: Pagination) {
     return this.appointmentService.getAppointmentPatient(user['memberId'], dto, pagination);
   }
+
+  @Get('appointment-time')
+  @HttpCode(HttpStatus.OK)
+  getAppointmentTime(@Query() dto: GetTimeAppointmentDto) {
+    return this.appointmentService.getTimeAppointment(dto);
+  }
+
   @Post('appointment')
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateAppointmentDto) {

@@ -3,6 +3,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { StatusAppointment } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsDate, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import * as moment from 'moment';
 
 export class FilterAppointmentDto {
   @IsString()
@@ -42,4 +43,16 @@ export class FilterAppointmentDto {
   @Min(0)
   @ApiPropertyOptional({ example: 10 })
   pageSize?: number;
+}
+
+export class GetTimeAppointmentDto {
+  @IsString()
+  @IsOptional()
+  @ApiPropertyOptional({ example: '' })
+  doctorId?: string;
+
+  @IsDate()
+  @IsOptional()
+  @ApiPropertyOptional({ example: moment().utcOffset(7, true).toDate() })
+  timeDate?: Date;
 }
