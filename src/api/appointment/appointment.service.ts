@@ -146,7 +146,10 @@ export class AppointmentService {
 
       const newData = await Promise.all(
         data.map(async (item) => {
-          if (item.dateMeeting.getTime() < Date.now() && item.statusAppointment === StatusAppointment.APPROVED) {
+          if (
+            item.dateMeeting.getTime() < Date.now() - 24 * 60 * 60 * 1000 &&
+            item.statusAppointment === StatusAppointment.APPROVED
+          ) {
             const itemUpdate = await this.prismaService.appointment.update({
               where: {
                 id: item.id,
@@ -227,7 +230,10 @@ export class AppointmentService {
       ]);
       const newData = await Promise.all(
         data.map(async (item) => {
-          if (item.dateMeeting.getTime() < Date.now() && item.statusAppointment === StatusAppointment.APPROVED) {
+          if (
+            item.dateMeeting.getTime() < Date.now() - 24 * 60 * 60 * 1000 &&
+            item.statusAppointment === StatusAppointment.APPROVED
+          ) {
             const itemUpdate = await this.prismaService.appointment.update({
               where: {
                 id: item.id,
