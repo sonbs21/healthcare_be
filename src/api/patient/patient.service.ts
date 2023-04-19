@@ -89,15 +89,15 @@ export class PatientService {
     }
   }
 
-  async update(id: string, dto: UpdatePatientDto) {
+  async update(memberId: string, dto: UpdatePatientDto) {
     try {
       const exist = await this.prismaService.patient.findFirst({
-        where: { id },
+        where: { id: memberId },
       });
       if (!exist) throw new BadRequestException(t(MESS_CODE['PATIENT_NOT_FOUND']));
 
       const data = await this.prismaService.patient.update({
-        where: { id },
+        where: { id: memberId },
         data: {
           ...dto,
         },

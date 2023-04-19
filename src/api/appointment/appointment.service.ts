@@ -304,24 +304,7 @@ export class AppointmentService {
         where: { id: dto.doctorId },
       });
       if (!exist) throw new BadRequestException(t(MESS_CODE['DOCTOR_NOT_FOUND']));
-      console.log(123123, dto.timeDate);
-      console.log(
-        '🚀 ~ dto:123',
-        moment
-          .utc(dto.timeDate)
-          .utcOffset(6 * 60 * 1000)
-          .startOf('day')
-          .toISOString(),
-      );
-      console.log(
-        '🚀 ~ dto:123',
-        moment
-          .utc(dto.timeDate)
-          .utcOffset(6 * 60 * 1000)
-          .endOf('day')
-          .toISOString(),
-      );
-      moment.utc(dto.timeDate).utcOffset(7).startOf('day').toISOString();
+
       const arrTime = [];
       const app = await this.prismaService.appointment.findMany({
         where: {

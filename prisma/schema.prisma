@@ -49,6 +49,7 @@ enum TypeNotification {
   SYSTEM
   APPOINTMENT
   EMERGENCY
+  REMIND
 }
 
 enum Status {

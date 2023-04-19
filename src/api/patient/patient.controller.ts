@@ -32,10 +32,10 @@ export class PatientController {
     return this.patientService.findOne(id);
   }
 
-  @Patch('patient/:id')
+  @Patch('patient')
   @HttpCode(HttpStatus.OK)
-  update(@Param('id') id: string, @Body() dto: UpdatePatientDto) {
-    return this.patientService.update(id, dto);
+  update(@CurrentUser() user, @Body() dto: UpdatePatientDto) {
+    return this.patientService.update(user['memberId'], dto);
   }
 
   @Put('patient/select')

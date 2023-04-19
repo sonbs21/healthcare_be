@@ -3,12 +3,14 @@ import { ResponseSuccess } from '@/types';
 import { MESS_CODE, t } from '@/utils';
 import { SocketGateWayService } from '@api/socket-io/socket-io.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, TypeNotification } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination } from '@types';
 import { cleanup } from '@utils';
 import { notificationSelect, notificationsSelect } from './conditions';
 import { CreateNotificationsDto, FilterNotificationsDto, UpdateNotificationDto } from './dto';
+import { Cron } from '@nestjs/schedule';
+import { CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class NotificationsService {
@@ -204,6 +206,38 @@ export class NotificationsService {
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       throw new BadRequestException(err.message);
+    }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_9AM)
+  async remindHealthCare() {
+    try {
+      const ids = await this.prismaService.patient.findMany({
+        select: {
+          id: true,
+        },
+      });
+
+      await Promise.all(
+        ids.map(async (i) => {
+          const notification = await this.prismaService.notification.create({
+            data: {
+              title: 'Nhắc nhở',
+              content: `Đã đến giờ báo cáo sừc khỏe`,
+              typeNotification: TypeNotification.REMIND,
+              isRead: false,
+              userId: i.id,
+            },
+          });
+
+          await this.socketsService.newNotification({
+            notificationId: notification.id,
+            data: notification,
+          });
+        }),
+      );
+    } catch (err) {
+      console.log(err);
     }
   }
 }

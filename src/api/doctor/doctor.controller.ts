@@ -41,9 +41,9 @@ export class DoctorController {
     return this.doctorService.findOne(id);
   }
 
-  @Patch('doctor/:id')
+  @Patch('doctor')
   @HttpCode(HttpStatus.OK)
-  update(@Param('id') id: string, @Body() dto: UpdateDoctorDto) {
-    return this.doctorService.update(id, dto);
+  update(@CurrentUser() user, @Body() dto: UpdateDoctorDto) {
+    return this.doctorService.update(user['memberId'], dto);
   }
 }

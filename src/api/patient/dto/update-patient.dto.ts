@@ -1,12 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
-import {
-
-  IsOptional,
-  IsString,
-  MinLength,
-} from 'class-validator';
-
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsOptional, IsString, MinLength } from 'class-validator';
 
 export class UpdatePatientDto {
   // @IsString()
@@ -30,11 +24,6 @@ export class UpdatePatientDto {
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({ example: '' })
-  email?: string;
-
-  @IsString()
-  @IsOptional()
-  @ApiPropertyOptional({ example: '' })
   job?: string;
 
   @IsString()
@@ -45,7 +34,7 @@ export class UpdatePatientDto {
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({ example: '' })
-  status?: string;
+  state?: string;
 
   @IsString()
   @IsOptional()
