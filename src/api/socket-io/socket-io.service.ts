@@ -124,4 +124,65 @@ export class SocketGateWayService implements OnModuleInit {
       });
     } catch (error) {}
   }
+
+  // call video
+  @SubscribeMessage('call')
+  async call(@MessageBody() body: { conversationId: string; callerId: string; calleeId: string }) {
+    try {
+      const { conversationId, callerId, calleeId } = body;
+      // emit signal to callee
+
+      this.server.to(calleeId).emit('incomingCall', {
+        conversationId,
+        callerId,
+      });
+    } catch (error) {
+      // handle error
+      console.log(error);
+    }
+  }
+
+  @SubscribeMessage('acceptCall')
+  async acceptCall(@MessageBody() body: { conversationId: string; callerId: string; calleeId: string }) {
+    try {
+      const { conversationId, callerId, calleeId } = body;
+      // emit signal to caller
+      console.log(body);
+      this.server.to(callerId).emit('callAccepted', {
+        conversationId,
+        calleeId,
+      });
+    } catch (error) {
+      // handle error
+    }
+  }
+
+  @SubscribeMessage('rejectCall')
+  async rejectCall(@MessageBody() body: { conversationId: string; callerId: string; calleeId: string }) {
+    try {
+      const { conversationId, callerId, calleeId } = body;
+      // emit signal to caller
+      this.server.to(callerId).emit('callRejected', {
+        conversationId,
+        calleeId,
+      });
+    } catch (error) {
+      // handle error
+    }
+  }
+  @SubscribeMessage('cancelCall')
+  async cancelCall(@MessageBody() body: { conversationId: string; callerId: string; calleeId: string }) {
+    try {
+      const { conversationId, callerId, calleeId } = body;
+      // emit signal to callee
+      console.log(body);
+      this.server.to(calleeId).emit('callCancelled', {
+        conversationId,
+        callerId,
+      });
+    } catch (error) {
+      // handle error
+      console.log(error);
+    }
+  }
 }
