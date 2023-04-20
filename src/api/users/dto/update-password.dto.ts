@@ -9,15 +9,15 @@ export class UpdatePasswordDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(6)
-  @MaxLength(255)
+  // @MinLength(6, { message: 'Mật khẩu ít nhất 6 ký tự' })
+  // @MaxLength(255)
   @ApiProperty({ example: 'newPassword123' })
   newPassword: string;
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(6)
-  @MaxLength(255)
+  // @MinLength(6, { message: 'Mật khẩu ít nhất 6 ký tự' })
+  // @MaxLength(255)
   @ApiProperty({ example: 'newPassword123' })
   confirmNewPassword: string;
 }

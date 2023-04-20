@@ -244,7 +244,7 @@ export class UsersService {
   async updatePassword(dto: UpdatePasswordDto) {
     try {
       // if (!dto?.newPassword.match(PASSWORD_REGEX)) throw new BadRequestException(t(MESS_CODE['PASSWORD_NOT_INVALID']));
-
+      if (dto.newPassword.length < 6) throw new BadRequestException(t(MESS_CODE['PASSWORD_INVALID']));
       if (dto.newPassword !== dto.confirmNewPassword)
         throw new BadRequestException(t(MESS_CODE['NEW_PASSWORD_NOT_MATCH']));
 
@@ -267,7 +267,7 @@ export class UsersService {
     try {
       // if (!dto.newPassword.match(PASSWORD_REGEX))
       //   throw new BadRequestException(t(MESS_CODE['PASSWORD_NOT_INVALID'], language));
-
+      if (dto.newPassword.length < 6) throw new BadRequestException(t(MESS_CODE['PASSWORD_INVALID']));
       if (dto.newPassword !== dto.confirmNewPassword)
         throw new BadRequestException(t(MESS_CODE['NEW_PASSWORD_NOT_MATCH']));
 
