@@ -1,7 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Gender } from '@prisma/client';
 import { Transform } from 'class-transformer';
-import { IsOptional, IsString, MinLength } from 'class-validator';
-
+import { IsDate, IsEnum, IsOptional, IsString, MaxDate, MinLength } from 'class-validator';
+import * as moment from 'moment';
 export class UpdatePatientDto {
   // @IsString()
   // @IsOptional()
@@ -20,6 +21,17 @@ export class UpdatePatientDto {
   @IsOptional()
   @ApiPropertyOptional({ example: '' })
   address?: string;
+
+  @IsEnum(Gender)
+  @IsOptional()
+  @ApiPropertyOptional({ example: Gender.MALE })
+  gender?: Gender;
+
+  @IsDate()
+  @IsOptional()
+  @MaxDate(moment().subtract(1, 'days').utcOffset(7, true).toDate())
+  @ApiPropertyOptional({ example: moment().utcOffset(7, true).toDate() })
+  dateOfBirth: Date;
 
   @IsString()
   @IsOptional()
