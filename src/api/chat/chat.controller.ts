@@ -52,7 +52,6 @@ export class ChatController {
     },
   })
   uploads(@UploadedFiles() files) {
-    console.log('🚀 ~ files:', files);
     return this.chatService.uploads(files);
   }
 }

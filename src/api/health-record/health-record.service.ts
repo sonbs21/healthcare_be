@@ -571,7 +571,6 @@ export class HealthRecordService {
       });
       return ResponseSuccess({}, MESS_CODE['SUCCESS'], {});
     } catch (error) {
-      console.log('error', error.message);
     }
   }
 

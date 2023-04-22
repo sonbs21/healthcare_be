@@ -255,7 +255,6 @@ export class PatientService {
         return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
       }
     } catch (err) {
-      console.log(err.message);
       throw new BadRequestException(err.message);
     }
   }

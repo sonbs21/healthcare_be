@@ -147,7 +147,6 @@ export class SocketGateWayService implements OnModuleInit {
     try {
       const { conversationId, callerId, calleeId } = body;
       // emit signal to caller
-      console.log(body);
       this.server.to(callerId).emit('callAccepted', {
         conversationId,
         calleeId,
@@ -175,7 +174,6 @@ export class SocketGateWayService implements OnModuleInit {
     try {
       const { conversationId, callerId, calleeId } = body;
       // emit signal to callee
-      console.log(body);
       this.server.to(calleeId).emit('callCancelled', {
         conversationId,
         callerId,

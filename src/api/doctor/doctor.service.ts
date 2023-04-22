@@ -60,7 +60,6 @@ export class DoctorService {
         skip: !dto?.isAll ? skip : undefined,
         take: !dto?.isAll ? take : undefined,
       });
-      console.log('🚀 ~ avgRate:', avgRate);
 
       avgRate.map((i) => {
         avgArr.push({
@@ -275,7 +274,6 @@ export class DoctorService {
         total,
       });
     } catch (err) {
-      console.log('err', err.message);
       throw new BadRequestException(err.message);
     }
   }

@@ -110,136 +110,70 @@ export class UsersService {
     }
   }
 
-  // async uploads(id, file) {
-  //   try {
-  //     if (!file) throw new BadRequestException(t(MESS_CODE['DATA_NOT_FOUND'], {}));
+  async changeAvatar(id, file) {
+    try {
+      if (!file) throw new BadRequestException(t(MESS_CODE['DATA_NOT_FOUND'], {}));
 
-  //     // console.log(12312321, file.mimetype.match(IMAGE_REGEX));
-  //     if (!file.mimetype.match(IMAGE_REGEX)) {
-  //       throw new BadRequestException(t(MESS_CODE['IMAGE_NOT_FORMAT'], {}));
-  //     }
-  //     if (file.size > process.env.MAX_SIZE) {
-  //       throw new BadRequestException(t(MESS_CODE['MAX_SIZE_WARNING'], {}));
-  //     }
+      if (!file.mimetype.match(IMAGE_REGEX)) {
+        throw new BadRequestException(t(MESS_CODE['IMAGE_NOT_FORMAT'], {}));
+      }
+      if (file.size > process.env.MAX_SIZE) {
+        throw new BadRequestException(t(MESS_CODE['MAX_SIZE_WARNING'], {}));
+      }
 
-  //     const fileName = `${new Date().getTime()}_${file.originalname}`;
-  //     const params: PutObjectCommandInput = {
-  //       Bucket: bucket_name,
-  //       Key: `${folder_name}/${fileName}`,
-  //       Body: file.buffer,
-  //       ACL: 'public-read',
-  //       ContentType: file.mimetype,
-  //     };
-  //     try {
-  //       const data = await s3Client.send(new PutObjectCommand(params));
+      const fileName = `${new Date().getTime()}_${file.originalname}`;
+      const params: PutObjectCommandInput = {
+        Bucket: bucket_name,
+        Key: `${folder_name}/${fileName}`,
+        Body: file.buffer,
+        ACL: 'public-read',
+        ContentType: file.mimetype,
+      };
+      try {
+        const data = await s3Client.send(new PutObjectCommand(params));
 
-  //       const patient
+        const patient = await this.prismaService.patient.findFirst({
+          where: {
+            id,
+          },
+        });
 
-  //       if (data && data?.$metadata?.httpStatusCode === 200) {
-  //         const data = await this.prismaService.file.create({
-  //           data: {
-  //             name: fileName,
-  //             url: aws_s3_url + params.Key,
-  //           },
-  //           select: {
-  //             id: true,
-  //             name: true,
-  //             url: true,
-  //           },
-  //         });
-  //       }
-  //     } catch (err) {
-  //       throw new BadRequestException(err.message);
-  //     }
-  //   } catch (error) {
-  //     console.log('🚀 ~~~~~~ error:', error.message);
-  //     throw new BadRequestException(error.message);
-  //   }
-  // }
+        const doctor = await this.prismaService.doctor.findFirst({
+          where: {
+            id,
+          },
+        });
 
-  // async createUser(userId: string, dto: CreateUsersDto) {
-  //   try {
-  //     const { staffId, decentralizations, ...createUser } = dto;
-  //     const staffExist = await this.prismaService.staff.findFirst({
-  //       where: {
-  //         id: staffId,
-  //         isDeleted: false,
-  //       },
-  //     });
-  //     if (!staffExist) throw new BadRequestException(t(MESS_CODE['STAFF_NOT_FOUND'], language));
+        if (patient) {
+          const data = await this.prismaService.patient.update({
+            where: {
+              id,
+            },
+            data: {
+              avatar: aws_s3_url + params.Key,
+            },
+          });
+          return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
+        }
 
-  //     if (!dto?.username.match(USERNAME_REGEX))
-  //       throw new BadRequestException(t(MESS_CODE['INVALID_USERNAME'], language));
-
-  //     const usernameExist = await this.checkUsernameExist(createUser.username);
-  //     if (usernameExist) throw new BadRequestException(t(MESS_CODE['USERNAME_EXIST'], language));
-
-  //     const newHashPassword = await this.bcryptService.hash(process.env.DEFAULT_PASSWORD);
-
-  //     const data = await this.prismaService.$transaction(async (prisma) => {
-  //       const data = await this.prismaService.user.create({
-  //         data: {
-  //           ...createUser,
-  //           password: newHashPassword,
-  //           staff: { connect: { id: staffId } },
-  //           createdBy: userId,
-  //         },
-  //       });
-
-  //       await Promise.all(
-  //         decentralizations.map(async (item: CreateUserDecentralization) => {
-  //           if (item?.departmentIds?.length) {
-  //             for (const id of item.departmentIds) {
-  //               const departmentExist = await prisma.department.findFirst({ where: { id: id } });
-  //               if (!departmentExist) throw new BadRequestException(t(MESS_CODE['DEPARTMENT_NOT_FOUND'], language));
-  //             }
-  //           }
-
-  //           const decentralizationExist = await prisma.decentralization.findFirst({
-  //             where: {
-  //               userId: data.id,
-  //               roleId: item.roleId,
-  //             },
-  //           });
-
-  //           if (!decentralizationExist) {
-  //             // Create decentralization
-  //             await prisma.decentralization.create({
-  //               data: {
-  //                 role: { connect: { id: item.roleId } },
-  //                 departments: item?.departmentIds?.length
-  //                   ? { connect: item.departmentIds.map((item: string) => ({ id: item })) }
-  //                   : undefined,
-  //                 user: { connect: { id: data.id } },
-  //                 createdBy: userId,
-  //               },
-  //             });
-  //           } else {
-  //             // Update decentralization
-  //             await prisma.decentralization.update({
-  //               where: { id: decentralizationExist?.id },
-  //               data: {
-  //                 role: { connect: { id: item.roleId } },
-  //                 departments: item?.departmentIds?.length
-  //                   ? { connect: item.departmentIds.map((item: string) => ({ id: item })) }
-  //                   : undefined,
-  //                 user: { connect: { id: data.id } },
-  //                 updatedBy: userId,
-  //               },
-  //             });
-  //           }
-  //         }),
-  //       );
-  //       return await this.prismaService.user.findFirst({
-  //         where: { id: data.id },
-  //         select: usersSelect,
-  //       });
-  //     });
-  //     return ResponseSuccess(data, MESS_CODE['SUCCESS'], { language });
-  //   } catch (err) {
-  //     throw new BadRequestException(err.message);
-  //   }
-  // }
+        if (doctor) {
+          const data = await this.prismaService.doctor.update({
+            where: {
+              id,
+            },
+            data: {
+              avatar: aws_s3_url + params.Key,
+            },
+          });
+          return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
+        }
+      } catch (err) {
+        throw new BadRequestException(err.message);
+      }
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
   async updatePassword(dto: UpdatePasswordDto) {
     try {

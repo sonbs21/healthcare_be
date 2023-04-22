@@ -324,10 +324,8 @@ export class AppointmentService {
           },
         },
       });
-      console.log('🚀 ~ app:', app);
 
       await Promise.all(app.map((i) => arrTime.push(i.timeMeeting)));
-      console.log('🚀 ~ arrTime:', arrTime);
 
       return ResponseSuccess(arrTime, MESS_CODE['SUCCESS'], {});
     } catch (error) {}

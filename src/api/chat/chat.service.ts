@@ -264,10 +264,6 @@ export class ChatService {
       if (!files.length) throw new BadRequestException(t(MESS_CODE['DATA_NOT_FOUND'], {}));
 
       for (const file of files) {
-        // console.log(12312321, file.mimetype.match(IMAGE_REGEX));
-        // if (!file.mimetype.match(IMAGE_REGEX)) {
-        //   throw new BadRequestException(t(MESS_CODE['IMAGE_NOT_FORMAT'], {}));
-        // }
         if (file.size > process.env.MAX_SIZE) {
           throw new BadRequestException(t(MESS_CODE['MAX_SIZE_WARNING'], {}));
         }
@@ -282,7 +278,10 @@ export class ChatService {
         };
         try {
           const data = await s3Client.send(new PutObjectCommand(params));
+          console.log('🚀 ~ data:', data);
+
           if (data && data?.$metadata?.httpStatusCode === 200) {
+            console.log('3333', aws_s3_url + params.Key);
             const data = await this.prismaService.file.create({
               data: {
                 name: fileName,
@@ -303,7 +302,6 @@ export class ChatService {
       }
       return dataUpload;
     } catch (error) {
-      console.log('🚀 ~~~~~~ error:', error.message);
       throw new BadRequestException(error.message);
     }
   }
