@@ -130,7 +130,7 @@ export class UsersService {
         ContentType: file.mimetype,
       };
       try {
-        // const data = await s3Client.send(new PutObjectCommand(params));
+        const data = await s3Client.send(new PutObjectCommand(params));
 
         const patient = await this.prismaService.patient.findFirst({
           where: {
