@@ -47,9 +47,4 @@ export class UpdatePatientDto {
   @IsOptional()
   @ApiPropertyOptional({ example: '' })
   fullNameCarer?: string;
-
-  @IsString()
-  @IsOptional()
-  @ApiPropertyOptional({ example: '' })
-  medicalHistory?: string;
 }
