@@ -2,10 +2,10 @@
 import { UsersService } from '@api/users/users.service';
 import { JwtAuthGuard } from '@auth/guards';
 import { CurrentUser } from '@decorators';
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiNoContentResponse, ApiTags } from '@nestjs/swagger';
 import { ChangePasswordDto, UpdatePasswordDto } from './dto';
-import { FileInterceptor } from '@nestjs/platform-express';
 @Controller('v1/user')
 @ApiTags('Users')
 export class UsersController {
@@ -16,6 +16,11 @@ export class UsersController {
   @ApiBearerAuth()
   getMe(@CurrentUser() user) {
     return this.usersService.getMe(user['id']);
+  }
+
+  @Get('me/:id')
+  getUser(@Param('id') id: string) {
+    return this.usersService.getUser(id);
   }
 
   @Patch('change-password')

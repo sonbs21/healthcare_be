@@ -41,12 +41,12 @@ export class UpdatePatientDto {
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({ example: '' })
-  insuranceNumber?: string;
+  phoneCarer?: string;
 
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({ example: '' })
-  state?: string;
+  fullNameCarer?: string;
 
   @IsString()
   @IsOptional()

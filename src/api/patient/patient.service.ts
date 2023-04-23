@@ -91,15 +91,45 @@ export class PatientService {
 
   async update(memberId: string, dto: UpdatePatientDto) {
     try {
+      const { phoneCarer, fullNameCarer, ...updateDto } = dto;
       const exist = await this.prismaService.patient.findFirst({
         where: { id: memberId },
       });
       if (!exist) throw new BadRequestException(t(MESS_CODE['PATIENT_NOT_FOUND']));
-
+      const carer = await this.prismaService.carer.findFirst({
+        where: { patientId: memberId },
+      });
+      await this.prismaService.carer.update({
+        where: { id: carer.id },
+        data: {
+          phone: phoneCarer,
+          fullName: fullNameCarer,
+        },
+      });
       const data = await this.prismaService.patient.update({
         where: { id: memberId },
         data: {
-          ...dto,
+          ...updateDto,
+        },
+        select: {
+          id: true,
+          fullName: true,
+          gender: true,
+          address: true,
+          dateOfBirth: true,
+          phone: true,
+          avatar: true,
+          job: true,
+          insuranceNumber: true,
+          state: true,
+          medicalHistory: true,
+          carer: {
+            select: {
+              id: true,
+              fullName: true,
+              phone: true,
+            },
+          },
         },
       });
 

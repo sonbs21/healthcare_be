@@ -130,7 +130,7 @@ export class UsersService {
         ContentType: file.mimetype,
       };
       try {
-        const data = await s3Client.send(new PutObjectCommand(params));
+        // const data = await s3Client.send(new PutObjectCommand(params));
 
         const patient = await this.prismaService.patient.findFirst({
           where: {
@@ -233,21 +233,72 @@ export class UsersService {
     }
   }
 
-  // async deleteUser(userId: string, id: string) {
-  //   try {
-  //     const userIdExist = await this.checkUserExist(id);
-  //     if (!userIdExist) throw new BadRequestException(t(MESS_CODE['USER_NOT_FOUND'], language));
+  async getUser(id: string) {
+    try {
+      const userIdExist = await this.checkUserExist(id);
+      if (!userIdExist) throw new BadRequestException(t(MESS_CODE['USER_NOT_FOUND'], {}));
+      const select = {
+        id: true,
+        phone: true,
+        memberId: true,
+        role: true,
+      };
+      const me = await this.prismaService.user.findFirst({
+        where: {
+          id: id,
+          isDeleted: false,
+        },
+        select: {
+          memberId: true,
+          role: true,
+        },
+      });
+      if (me['role'] === Role.PATIENT) {
+        select['patient'] = {
+          select: {
+            id: true,
+            fullName: true,
+            phone: true,
+            gender: true,
+            dateOfBirth: true,
+            address: true,
+            avatar: true,
+            job: true,
+            insuranceNumber: true,
+            state: true,
+            medicalHistory: true,
+            doctorId: true,
+            carer: true,
+          },
+        };
+      } else {
+        select['doctor'] = true;
+      }
 
-  //     const data = await this.prismaService.user.update({
-  //       where: { id },
-  //       data: {
-  //         isDeleted: true,
-  //         deletedBy: userId,
-  //       },
-  //     });
-  //     return ResponseSuccess(data, MESS_CODE['SUCCESS'], { language });
-  //   } catch (err) {
-  //     throw new BadRequestException(err.message);
-  //   }
-  // }
+      const data: any = await this.prismaService.user.findFirst({
+        where: {
+          id: id,
+          isDeleted: false,
+        },
+        select: select,
+      });
+
+      if (me['role'] === Role.DOCTOR) {
+        const rating = await this.prismaService.rating.aggregate({
+          where: {
+            doctorId: me.memberId,
+          },
+          _avg: {
+            rate: true,
+          },
+        });
+        data.doctor['rate'] = customRound(rating?._avg?.rate) ?? 0;
+        // data['rate'] = customRound(rating?._avg?.rate) ?? 0;
+      }
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
 }
