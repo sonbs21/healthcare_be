@@ -235,8 +235,8 @@ export class UsersService {
 
   async getUser(id: string) {
     try {
-      const userIdExist = await this.checkUserExist(id);
-      if (!userIdExist) throw new BadRequestException(t(MESS_CODE['USER_NOT_FOUND'], {}));
+      // const userIdExist = await this.checkUserExist(id);
+      // if (!userIdExist) throw new BadRequestException(t(MESS_CODE['USER_NOT_FOUND'], {}));
       const select = {
         id: true,
         phone: true,
@@ -245,7 +245,7 @@ export class UsersService {
       };
       const me = await this.prismaService.user.findFirst({
         where: {
-          id: id,
+          memberId: id,
           isDeleted: false,
         },
         select: {
@@ -277,7 +277,7 @@ export class UsersService {
 
       const data: any = await this.prismaService.user.findFirst({
         where: {
-          id: id,
+          memberId: id,
           isDeleted: false,
         },
         select: select,
