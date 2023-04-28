@@ -8,9 +8,9 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://root@localhost:3306/healthcare?connection_limit=0&pool_timeout=0"
+  url      = "mysql://root:rCRaLx4CTuE0c4LpnvPE@containers-us-west-165.railway.app:6064/railway"
 }
-
+// mysql://root:rCRaLx4CTuE0c4LpnvPE@containers-us-west-165.railway.app:6064/railway
 // ***** ENUM ***** //
 enum Gender {
   MALE
@@ -269,19 +269,6 @@ model Appointment {
 
   doctor  Doctor?  @relation("doctor_appointments", fields: [doctorId], references: [id])
   patient Patient? @relation("patient_appointments", fields: [patientId], references: [id])
-}
-
-model NotificationApointment {
-  id              String    @id @default(cuid()) @db.VarChar(32)
-  appointmentNote String    @db.VarChar(255)
-  time            DateTime?
-
-  createdAt DateTime @default(now())
-  createdBy String?  @db.VarChar(32)
-  updatedAt DateTime @updatedAt
-  updatedBy String?  @db.VarChar(32)
-  isDeleted Boolean  @default(false) @db.TinyInt()
-  deletedBy String?  @db.VarChar(32)
 }
 
 model HealthRecord {
