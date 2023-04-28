@@ -31,7 +31,7 @@ export class UpdatePatientDto {
   @IsOptional()
   @MaxDate(moment().subtract(1, 'days').utcOffset(7, true).toDate())
   @ApiPropertyOptional({ example: moment().utcOffset(7, true).toDate() })
-  dateOfBirth: Date;
+  dateOfBirth?: Date;
 
   @IsString()
   @IsOptional()
