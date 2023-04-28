@@ -59,7 +59,7 @@ export class AuthService {
         },
         {
           secret: this.configService.get('JWT_ACCESS_SECRET'),
-          expiresIn: process.env.JWT_ACCESS_DURATION,
+          expiresIn: '7d',
         },
       ),
       this.jwtService.signAsync(
@@ -68,10 +68,11 @@ export class AuthService {
         },
         {
           secret: this.configService.get('JWT_REFRESH_SECRET'),
-          expiresIn: process.env.JWT_REFRESH_DURATION,
+          expiresIn: '7d',
         },
       ),
     ]);
+    console.log('🚀 ~ access_token:', access_token);
 
     await this.updateTokenUser(id, refresh_token);
     return {
