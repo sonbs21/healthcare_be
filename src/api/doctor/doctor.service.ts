@@ -84,10 +84,13 @@ export class DoctorService {
           take: !dto?.isAll ? take : undefined,
         }),
       ]);
+      console.log('🚀 ~ data:', data);
       const newData = [];
       await Promise.all(
         data.map((i) => {
           avgArr.map((j) => {
+            console.log('🚀 ~ i.id:', i.id);
+            console.log('🚀 ~ j.doctorId:', j.doctorId);
             if (i.id === j.doctorId) {
               newData.push({
                 ...i,

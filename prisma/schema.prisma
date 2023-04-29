@@ -9,7 +9,9 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = "mysql://root:rCRaLx4CTuE0c4LpnvPE@containers-us-west-165.railway.app:6064/railway"
+  // url      = env("DATABASE_URL")
 }
+
 // mysql://root:rCRaLx4CTuE0c4LpnvPE@containers-us-west-165.railway.app:6064/railway
 // ***** ENUM ***** //
 enum Gender {
