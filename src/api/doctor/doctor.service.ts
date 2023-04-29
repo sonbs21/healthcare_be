@@ -96,11 +96,13 @@ export class DoctorService {
                 newData.push({
                   ...i,
                   rating: customRound(j.rating) ?? 0,
+                  countPatient: i.patient.length
                 });
               } else {
                 newData.push({
                   ...i,
                   rating: 0,
+                  countPatient: i.patient.length
                 });
               }
             });
@@ -108,6 +110,7 @@ export class DoctorService {
             newData.push({
               ...i,
               rating: 0,
+              countPatient: i.patient.length
             });
           }
         }),
