@@ -88,21 +88,28 @@ export class DoctorService {
       const newData = [];
       await Promise.all(
         data.map((i) => {
-          avgArr.map((j) => {
-            console.log('🚀 ~ i.id:', i.id);
-            console.log('🚀 ~ j.doctorId:', j.doctorId);
-            if (i.id === j.doctorId) {
-              newData.push({
-                ...i,
-                rating: customRound(j.rating) ?? 0,
-              });
-            } else {
-              newData.push({
-                ...i,
-                rating: 0,
-              });
-            }
-          });
+          if (avgArr.length > 0) {
+            avgArr.map((j) => {
+              console.log('🚀 ~ i.id:', i.id);
+              console.log('🚀 ~ j.doctorId:', j.doctorId);
+              if (i.id === j.doctorId) {
+                newData.push({
+                  ...i,
+                  rating: customRound(j.rating) ?? 0,
+                });
+              } else {
+                newData.push({
+                  ...i,
+                  rating: 0,
+                });
+              }
+            });
+          } else {
+            newData.push({
+              ...i,
+              rating: 0,
+            });
+          }
         }),
       );
 
