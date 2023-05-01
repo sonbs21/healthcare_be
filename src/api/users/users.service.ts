@@ -117,13 +117,11 @@ export class UsersService {
       if (!file.mimetype.match(IMAGE_REGEX)) {
         throw new BadRequestException(t(MESS_CODE['IMAGE_NOT_FORMAT'], {}));
       }
-      // console.log('🚀 ~ process.env.MAX_SIZE:', process.env.MAX_SIZE);
       if (file.size > process.env.MAX_SIZE) {
         throw new BadRequestException(t(MESS_CODE['MAX_SIZE_WARNING'], {}));
       }
 
       const fileName = `${new Date().getTime()}_${file.originalname}`;
-      console.log('🚀 ~ fileName:', fileName);
       const params: PutObjectCommandInput = {
         Bucket: bucket_name,
         Key: `${folder_name}/${fileName}`,
@@ -131,10 +129,8 @@ export class UsersService {
         ACL: 'public-read',
         ContentType: file.mimetype,
       };
-      console.log('🚀 ~ params:', params);
       try {
         const data = await s3Client.send(new PutObjectCommand(params));
-        console.log('🚀 ~ data:', data);
 
         const patient = await this.prismaService.patient.findFirst({
           where: {

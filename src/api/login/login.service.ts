@@ -40,6 +40,7 @@ export class LoginUserService {
 
       const data = await this.authService.login(phoneExist);
       data['role'] = phoneExist.role;
+      data['memberId'] = phoneExist.memberId;
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
       throw new BadRequestException(err.message);

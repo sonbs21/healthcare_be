@@ -278,10 +278,8 @@ export class ChatService {
         };
         try {
           const data = await s3Client.send(new PutObjectCommand(params));
-          console.log('🚀 ~ data:', data);
 
           if (data && data?.$metadata?.httpStatusCode === 200) {
-            console.log('3333', aws_s3_url + params.Key);
             const data = await this.prismaService.file.create({
               data: {
                 name: fileName,

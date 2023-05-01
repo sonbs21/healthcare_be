@@ -72,7 +72,6 @@ export class AuthService {
         },
       ),
     ]);
-    console.log('🚀 ~ access_token:', access_token);
 
     await this.updateTokenUser(id, refresh_token);
     return {
