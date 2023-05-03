@@ -42,6 +42,7 @@ export class ChatService {
           createdBy: true,
           file: true,
         },
+        orderBy: { createdAt: 'desc' },
         skip: !dto?.isAll ? skip : undefined,
         take: !dto?.isAll ? take : undefined,
       });
