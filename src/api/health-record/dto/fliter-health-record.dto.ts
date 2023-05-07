@@ -33,3 +33,15 @@ export class FilterHealthRecordDto {
   @ApiPropertyOptional({ example: 10 })
   pageSize?: number;
 }
+
+export class Position {
+  @IsString()
+  @IsOptional()
+  @ApiPropertyOptional({ example: '' })
+  lat?: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiPropertyOptional({ example: '' })
+  lng?: string;
+}

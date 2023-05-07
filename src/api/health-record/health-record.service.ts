@@ -15,7 +15,7 @@ import {
   t,
 } from '@utils';
 import * as moment from 'moment';
-import { FilterHealthRecordDto } from './dto';
+import { FilterHealthRecordDto, Position } from './dto';
 import { CreateHealthRecordDto } from './dto/create-health-record.dto';
 import axios, { Axios } from 'axios';
 import { SocketGateWayService } from '@api/socket-io/socket-io.service';
@@ -536,13 +536,13 @@ export class HealthRecordService {
     }
   }
 
-  async emergency(memberId: string) {
+  async emergency(memberId: string, dto: Position) {
     try {
-      const response = await this.client.post(
-        'https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBRm7R6WMe0kidaFKn7LB4V_W3lvX-Ft4w',
-      );
-      const lat = response.data.location.lat;
-      const lng = response.data.location.lng;
+      // const response = await this.client.post(
+      //   'https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBRm7R6WMe0kidaFKn7LB4V_W3lvX-Ft4w',
+      // );
+      // const lat = response.data.location.lat;
+      // const lng = response.data.location.lng;
 
       const patient = await this.prismaService.patient.findFirst({
         where: {
@@ -559,7 +559,7 @@ export class HealthRecordService {
           title: 'Cấp cứu',
           content: `Bệnh nhân ${patient.fullName} đã gửi yêu cầu cấp cứu`,
           typeNotification: TypeNotification.EMERGENCY,
-          url: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
+          url: `https://www.google.com/maps/search/?api=1&query=${dto.lat},${dto.lng}`,
           isRead: false,
           userId: patient.doctorId,
         },

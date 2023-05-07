@@ -4,7 +4,7 @@ import { CurrentUser, Paginate } from '@decorators';
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
-import { FilterHealthRecordDto } from './dto';
+import { FilterHealthRecordDto, Position } from './dto';
 import { CreateHealthRecordDto } from './dto/create-health-record.dto';
 import { HealthRecordService } from './health-record.service';
 
@@ -41,8 +41,8 @@ export class HealthRecordController {
 
   @Post('emergency')
   @HttpCode(HttpStatus.OK)
-  emergency(@CurrentUser() user) {
-    return this.healthRecordService.emergency(user['memberId']);
+  emergency(@CurrentUser() user, @Body() dto: Position) {
+    return this.healthRecordService.emergency(user['memberId'], dto);
   }
 
   @Get('health-record-day')
