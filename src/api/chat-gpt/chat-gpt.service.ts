@@ -35,7 +35,7 @@ export class ChatGptService {
 
       const { data } = response;
       if (data.choices.length) {
-        return data.choices;
+        return data.choices[0];
       }
       return response.data;
     } catch (error) {
