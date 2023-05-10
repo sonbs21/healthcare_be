@@ -150,6 +150,7 @@ export class PatientService {
         where: { id: memberId },
         select: patientSelect,
       });
+      console.log('patient?.doctorId ', patient?.doctorId);
 
       if (patient?.doctorId !== null) {
         throw new BadRequestException(t(MESS_CODE['DOCTOR_NOT_FOUND']));
@@ -194,6 +195,8 @@ export class PatientService {
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {
+      console.log('exist', err.message);
+
       throw new BadRequestException(err.message);
     }
   }
