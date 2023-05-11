@@ -4,7 +4,7 @@ import { CurrentUser, Paginate } from '@decorators';
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
-import { FilterHealthRecordDto, Position } from './dto';
+import { FilterHealthRecordDto, Position, ResultSearch } from './dto';
 import { CreateHealthRecordDto } from './dto/create-health-record.dto';
 import { HealthRecordService } from './health-record.service';
 
@@ -55,6 +55,12 @@ export class HealthRecordController {
   @HttpCode(HttpStatus.OK)
   getHospitals(@Query() dto: Position) {
     return this.healthRecordService.getHospitals(dto);
+  }
+
+  @Get('resultSearch')
+  @HttpCode(HttpStatus.OK)
+  getPosition(@Query() dto: ResultSearch) {
+    return this.healthRecordService.getPosition(dto);
   }
 
   @Patch('health-record/:id')

@@ -45,3 +45,10 @@ export class Position {
   @ApiPropertyOptional({ example: '' })
   lng?: string;
 }
+
+export class ResultSearch {
+  @IsString()
+  @IsOptional()
+  @ApiPropertyOptional({ example: '' })
+  resultSearch?: string;
+}

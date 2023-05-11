@@ -17,7 +17,7 @@ import {
 } from '@utils';
 import axios, { Axios } from 'axios';
 import * as moment from 'moment';
-import { FilterHealthRecordDto, Position } from './dto';
+import { FilterHealthRecordDto, Position, ResultSearch } from './dto';
 import { CreateHealthRecordDto } from './dto/create-health-record.dto';
 
 @Injectable()
@@ -578,15 +578,24 @@ export class HealthRecordService {
     const type = 'hospital';
     const apiKey = 'AIzaSyBRm7R6WMe0kidaFKn7LB4V_W3lvX-Ft4w';
     const location = `${dto?.lat},${dto?.lng}`;
-    console.log(
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&radius=${radius}&type=${type}&key=${apiKey}`,
-    );
+
     const response = await this.client.get(
       `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&radius=${radius}&type=${type}&key=${apiKey}`,
     );
 
     const hospitals = response.data.results;
     return ResponseSuccess(hospitals, MESS_CODE['SUCCESS'], {});
+  }
+
+  async getPosition(dto: ResultSearch) {
+    const apiKey = 'AIzaSyBRm7R6WMe0kidaFKn7LB4V_W3lvX-Ft4w';
+
+    const response = await this.client.get(
+      `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${dto.resultSearch}&key=${apiKey}`,
+    );
+
+    const position = response.data.results;
+    return ResponseSuccess(position, MESS_CODE['SUCCESS'], {});
   }
 
   async findHealthRecordDay(memberId: string) {
