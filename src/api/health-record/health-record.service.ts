@@ -1,24 +1,24 @@
 /* eslint-disable prettier/prettier */
+import { SocketGateWayService } from '@api/socket-io/socket-io.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma, Status, TypeNotification } from '@prisma/client';
 import { PrismaService } from '@services';
 import { Pagination, ResponseSuccess } from '@types';
 import {
+  MESS_CODE,
   cleanup,
   funcIndexBmi,
-  MESS_CODE,
   recordBloodPressure,
   recordCholesterol,
-  recordIndexBmi,
   recordGlucose,
   recordHeartBeat,
+  recordIndexBmi,
   t,
 } from '@utils';
+import axios, { Axios } from 'axios';
 import * as moment from 'moment';
 import { FilterHealthRecordDto, Position } from './dto';
 import { CreateHealthRecordDto } from './dto/create-health-record.dto';
-import axios, { Axios } from 'axios';
-import { SocketGateWayService } from '@api/socket-io/socket-io.service';
 
 @Injectable()
 export class HealthRecordService {
@@ -26,7 +26,7 @@ export class HealthRecordService {
 
   constructor(private prismaService: PrismaService, private socketsService: SocketGateWayService) {
     this.client = axios.create({
-      baseURL: process.env.GGMAP_URL,
+      baseURL: 'https://maps.googleapis.com/maps/api/place/nearbysearch/json',
     });
   }
 
@@ -570,8 +570,23 @@ export class HealthRecordService {
         data: notification,
       });
       return ResponseSuccess({}, MESS_CODE['SUCCESS'], {});
-    } catch (error) {
-    }
+    } catch (error) {}
+  }
+
+  async getHospitals(dto: Position) {
+    const radius = 5000;
+    const type = 'hospital';
+    const apiKey = 'AIzaSyBRm7R6WMe0kidaFKn7LB4V_W3lvX-Ft4w';
+    const location = `${dto?.lat},${dto?.lng}`;
+    console.log(
+      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&radius=${radius}&type=${type}&key=${apiKey}`,
+    );
+    const response = await this.client.get(
+      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&radius=${radius}&type=${type}&key=${apiKey}`,
+    );
+
+    const hospitals = response.data.results;
+    return ResponseSuccess(hospitals, MESS_CODE['SUCCESS'], {});
   }
 
   async findHealthRecordDay(memberId: string) {

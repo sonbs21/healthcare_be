@@ -51,6 +51,12 @@ export class HealthRecordController {
     return this.healthRecordService.findHealthRecordDay(user['memberId']);
   }
 
+  @Get('hospitals')
+  @HttpCode(HttpStatus.OK)
+  getHospitals(@Query() dto: Position) {
+    return this.healthRecordService.getHospitals(dto);
+  }
+
   @Patch('health-record/:id')
   @HttpCode(HttpStatus.OK)
   update(@CurrentUser() user, @Param('id') id: string, @Body() dto: CreateHealthRecordDto) {
