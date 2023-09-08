@@ -259,6 +259,7 @@ export class AppointmentService {
   }
 
   async create(memberId: string, dto: CreateAppointmentDto) {
+    console.log("🚀 ~ dto:", dto)
     try {
       const patient = await this.prismaService.patient.findFirst({
         where: {

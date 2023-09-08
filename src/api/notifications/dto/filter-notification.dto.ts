@@ -14,6 +14,12 @@ export class FilterNotificationsDto {
   @ApiPropertyOptional({ example: false })
   isAll?: boolean;
 
+  // @IsBoolean()
+  // @Transform(({ obj, key }) => obj[key] === 'true')
+  // @IsOptional()
+  // @ApiPropertyOptional({ example: false })
+  // status?: boolean;
+
   @IsNumber()
   @IsOptional()
   @Min(1)

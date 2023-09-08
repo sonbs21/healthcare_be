@@ -18,7 +18,7 @@ import {
 import axios, { Axios } from 'axios';
 import * as moment from 'moment';
 import { FilterHealthRecordDto, Position, ResultSearch } from './dto';
-import { CreateHealthRecordDto } from './dto/create-health-record.dto';
+import { CreateHealthRecordCareDto, CreateHealthRecordDto } from './dto/create-health-record.dto';
 
 @Injectable()
 export class HealthRecordService {
@@ -697,6 +697,91 @@ export class HealthRecordService {
       });
 
       data['cholesterol'] = cholesterol?.cholesterol ?? '';
+
+      return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  async createCare(memberId: string, dto: CreateHealthRecordCareDto) {
+    try {
+      const { height, weight, cholesterol, systolic, diastolic, glucose, heartRateIndicator, dateRecord } = dto;
+      if (!Number(height) && Number(height) <= 0) throw new BadRequestException(t(MESS_CODE['INVALID_HEIGHT']));
+      if (!Number(weight) && Number(weight) <= 0) throw new BadRequestException(t(MESS_CODE['INVALID_WEIGHT']));
+      if (!Number(cholesterol) && Number(cholesterol) <= 0)
+        throw new BadRequestException(t(MESS_CODE['INVALID_CHOLESTEROL']));
+      if (!Number(diastolic) && Number(diastolic) <= 0)
+        throw new BadRequestException(t(MESS_CODE['INVALID_DIASTOLIC']));
+      if (!Number(glucose) && Number(glucose) <= 0) throw new BadRequestException(t(MESS_CODE['INVALID_GLUCOSE']));
+      if (!Number(systolic) && Number(systolic) <= 0) throw new BadRequestException(t(MESS_CODE['INVALID_SYSTOLIC']));
+      if (!Number(heartRateIndicator) && Number(heartRateIndicator) <= 0)
+        throw new BadRequestException(t(MESS_CODE['INVALID_HEARTBEAT']));
+
+      const patient = await this.prismaService.patient.findFirst({
+        where: { id: memberId },
+        select: {
+          id: true,
+          fullName: true,
+          doctorId: true,
+          healthRecord: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+
+      const indexBmi: any = funcIndexBmi(Number(height), Number(weight));
+      const data = await this.prismaService.$transaction(async (prisma) => {
+        await prisma.bmi.create({
+          data: {
+            healthRecordId: patient.healthRecord.id,
+            height,
+            weight,
+            indexBmi: `${indexBmi.toFixed(2)}`,
+            createdAt: dateRecord,
+            createdBy: memberId,
+          },
+        });
+
+        await prisma.cholesterol.create({
+          data: {
+            healthRecordId: patient.healthRecord.id,
+            cholesterol,
+            createdAt: dateRecord,
+            createdBy: memberId,
+          },
+        });
+
+        await prisma.glucose.create({
+          data: {
+            healthRecordId: patient.healthRecord.id,
+            glucose,
+            createdAt: dateRecord,
+            createdBy: memberId,
+          },
+        });
+
+        await prisma.heartbeat.create({
+          data: {
+            healthRecordId: patient.healthRecord.id,
+            heartRateIndicator,
+            createdAt: dateRecord,
+            createdBy: memberId,
+          },
+        });
+
+        await prisma.bloodPressure.create({
+          data: {
+            healthRecordId: patient.healthRecord.id,
+            systolic,
+            diastolic,
+            createdAt: dateRecord,
+            createdBy: memberId,
+          },
+        });
+      });
 
       return ResponseSuccess(data, MESS_CODE['SUCCESS'], {});
     } catch (err) {

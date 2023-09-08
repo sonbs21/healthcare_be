@@ -5,7 +5,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query,
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from '@types';
 import { FilterHealthRecordDto, Position, ResultSearch } from './dto';
-import { CreateHealthRecordDto } from './dto/create-health-record.dto';
+import { CreateHealthRecordCareDto, CreateHealthRecordDto } from './dto/create-health-record.dto';
 import { HealthRecordService } from './health-record.service';
 
 @Controller('v1')
@@ -37,6 +37,12 @@ export class HealthRecordController {
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user, @Body() dto: CreateHealthRecordDto) {
     return this.healthRecordService.create(user['memberId'], dto);
+  }
+
+  @Post('health-record-care')
+  @HttpCode(HttpStatus.CREATED)
+  createCare(@CurrentUser() user, @Body() dto: CreateHealthRecordCareDto) {
+    return this.healthRecordService.createCare(user['memberId'], dto);
   }
 
   @Post('emergency')
